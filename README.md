@@ -2,9 +2,9 @@
 Developed by Jonathan Soulsby and Kris Hayashi
 
 Game Requirements:
- A DE0-board (used as the game console), a USB cable and a power supply.
- A PS/2 Mouse (A USB Mouse + PS2 Adapter)
- A VGA cable
+A DE0-board (used as the game console), a USB cable and a power supply.
+A PS/2 Mouse (A USB Mouse + PS2 Adapter)
+A VGA cable
 
 The game (Tank Hunting, a reduced version of Dual tank game) is controlled and played (or displayed)
 using a PS/2 mouse, a VGA screen (640 x 480 pixels), DIP switches and pushbuttons as the manmachine
