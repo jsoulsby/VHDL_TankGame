@@ -2,5 +2,6 @@
 *.qpf
 *.qsf
 *.qws
+*.bak
 db/
 Miniproject Brief.pdf
