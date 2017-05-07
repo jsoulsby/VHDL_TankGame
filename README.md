@@ -8,7 +8,7 @@ A PS/2 Mouse (A USB Mouse + PS2 Adapter)
 
 A VGA cable
 
-The game (Tank Hunting, a reduced version of Dual tank game) is controlled and played (or displayed)
+The game is controlled and played (or displayed)
 using a PS/2 mouse, a VGA screen (640 x 480 pixels), DIP switches and pushbuttons as the manmachine
 interfaces. The game is displayed on an ordinary computer monitor via the VGA
 interface. The game comprises two tanks which are square boxes on the VGA monitor, one
