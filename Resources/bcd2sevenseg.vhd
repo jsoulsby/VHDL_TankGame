@@ -10,7 +10,6 @@ port(
 architecture behaviour of bcd2sevenseg is
 	signal seg_temp:	std_logic_vector (6 downto 0);
 begin    
-	--bin_temp <= bin_in3&bin_in2&bin_in1&bin_in0;
 	with bcd_in select
 		seg_temp <=
 			"1000000" when "0000", --0
