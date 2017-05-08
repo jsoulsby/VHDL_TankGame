@@ -345,28 +345,6 @@ applicable agreement for further details.
 	(annotation_block (location)(rect 1040 424 1096 440))
 )
 (symbol
-	(rect 584 256 712 336)
-	(text "clk_div" (rect 5 0 40 12)(font "Arial" ))
-	(text "inst" (rect 8 64 25 76)(font "Arial" ))
-	(port
-		(pt 0 32)
-		(input)
-		(text "clk1" (rect 0 0 20 12)(font "Arial" ))
-		(text "clk1" (rect 21 27 41 39)(font "Arial" ))
-		(line (pt 0 32)(pt 16 32))
-	)
-	(port
-		(pt 128 32)
-		(output)
-		(text "clk" (rect 0 0 14 12)(font "Arial" ))
-		(text "clk" (rect 96 27 110 39)(font "Arial" ))
-		(line (pt 128 32)(pt 112 32))
-	)
-	(drawing
-		(rectangle (rect 16 16 112 64))
-	)
-)
-(symbol
 	(rect 528 368 792 512)
 	(text "MOUSE" (rect 5 0 43 12)(font "Arial" ))
 	(text "inst1" (rect 8 128 31 140)(font "Arial" ))
@@ -491,14 +469,27 @@ applicable agreement for further details.
 		(rectangle (rect 16 16 200 64))
 	)
 )
-(connector
-	(pt 504 288)
-	(pt 584 288)
-)
-(connector
-	(text "clk_25MHz" (rect 722 272 775 284)(font "Arial" ))
-	(pt 712 288)
-	(pt 768 288)
+(symbol
+	(rect 544 256 712 336)
+	(text "clk_div" (rect 5 0 40 12)(font "Arial" ))
+	(text "inst" (rect 8 64 25 76)(font "Arial" ))
+	(port
+		(pt 0 32)
+		(input)
+		(text "clk_in" (rect 0 0 28 12)(font "Arial" ))
+		(text "clk_in" (rect 21 27 49 39)(font "Arial" ))
+		(line (pt 0 32)(pt 16 32))
+	)
+	(port
+		(pt 168 32)
+		(output)
+		(text "clk_halved" (rect 0 0 53 12)(font "Arial" ))
+		(text "clk_halved" (rect 103 27 156 39)(font "Arial" ))
+		(line (pt 168 32)(pt 152 32))
+	)
+	(drawing
+		(rectangle (rect 16 16 152 64))
+	)
 )
 (connector
 	(text "clk_25MHz" (rect 432 376 485 388)(font "Arial" ))
@@ -634,4 +625,13 @@ applicable agreement for further details.
 	(text "seg0[6]" (rect 914 728 950 740)(font "Arial" ))
 	(pt 992 736)
 	(pt 952 736)
+)
+(connector
+	(text "clk_25MHz" (rect 722 272 775 284)(font "Arial" ))
+	(pt 712 288)
+	(pt 768 288)
+)
+(connector
+	(pt 504 288)
+	(pt 544 288)
 )

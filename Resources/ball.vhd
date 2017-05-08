@@ -49,7 +49,7 @@ BEGIN
 			 	horiz_sync_out => horiz_sync, vert_sync_out => vert_sync_int,
 			 	pixel_row => pixel_row, pixel_column => pixel_column);
 
-Size <= CONV_STD_LOGIC_VECTOR(8,10);
+Size <= CONV_STD_LOGIC_VECTOR(2,10);	--BALL SIZE HERE
 Ball_X_pos <= CONV_STD_LOGIC_VECTOR(320,10);
 
 		-- need internal copy of vert_sync to read

@@ -23,7 +23,7 @@ applicable agreement for further details.
 	(input)
 	(rect 112 224 280 240)
 	(text "INPUT" (rect 125 0 153 10)(font "Arial" (font_size 6)))
-	(text "clk" (rect 5 0 20 12)(font "Arial" ))
+	(text "clk" (rect 5 0 19 12)(font "Arial" ))
 	(pt 168 8)
 	(drawing
 		(line (pt 84 12)(pt 109 12))
@@ -34,6 +34,7 @@ applicable agreement for further details.
 		(line (pt 109 12)(pt 113 8))
 	)
 	(text "VCC" (rect 128 7 148 17)(font "Arial" (font_size 6)))
+	(annotation_block (location)(rect 56 240 112 256))
 )
 (pin
 	(output)
@@ -50,6 +51,7 @@ applicable agreement for further details.
 		(line (pt 82 8)(pt 78 12))
 		(line (pt 78 12)(pt 82 8))
 	)
+	(annotation_block (location)(rect 1064 304 1120 320))
 )
 (pin
 	(output)
@@ -66,6 +68,7 @@ applicable agreement for further details.
 		(line (pt 82 8)(pt 78 12))
 		(line (pt 78 12)(pt 82 8))
 	)
+	(annotation_block (location)(rect 1064 320 1120 336))
 )
 (pin
 	(output)
@@ -82,6 +85,7 @@ applicable agreement for further details.
 		(line (pt 82 8)(pt 78 12))
 		(line (pt 78 12)(pt 82 8))
 	)
+	(annotation_block (location)(rect 1064 336 1120 352))
 )
 (pin
 	(output)
@@ -98,6 +102,7 @@ applicable agreement for further details.
 		(line (pt 82 8)(pt 78 12))
 		(line (pt 78 12)(pt 82 8))
 	)
+	(annotation_block (location)(rect 1064 352 1120 368))
 )
 (pin
 	(output)
@@ -114,28 +119,7 @@ applicable agreement for further details.
 		(line (pt 82 8)(pt 78 12))
 		(line (pt 78 12)(pt 82 8))
 	)
-)
-(symbol
-	(rect 360 200 488 280)
-	(text "clk_div" (rect 5 0 40 12)(font "Arial" ))
-	(text "inst" (rect 8 64 25 76)(font "Arial" ))
-	(port
-		(pt 0 32)
-		(input)
-		(text "clk1" (rect 0 0 20 12)(font "Arial" ))
-		(text "clk1" (rect 21 27 41 39)(font "Arial" ))
-		(line (pt 0 32)(pt 16 32))
-	)
-	(port
-		(pt 128 32)
-		(output)
-		(text "clk" (rect 0 0 14 12)(font "Arial" ))
-		(text "clk" (rect 96 27 110 39)(font "Arial" ))
-		(line (pt 128 32)(pt 112 32))
-	)
-	(drawing
-		(rectangle (rect 16 16 112 64))
-	)
+	(annotation_block (location)(rect 1064 368 1120 384))
 )
 (symbol
 	(rect 600 264 824 440)
@@ -222,13 +206,31 @@ applicable agreement for further details.
 		(rectangle (rect 16 16 208 160))
 	)
 )
+(symbol
+	(rect 320 200 488 280)
+	(text "clk_div" (rect 5 0 40 12)(font "Arial" ))
+	(text "inst" (rect 8 64 25 76)(font "Arial" ))
+	(port
+		(pt 0 32)
+		(input)
+		(text "clk_in" (rect 0 0 28 12)(font "Arial" ))
+		(text "clk_in" (rect 21 27 49 39)(font "Arial" ))
+		(line (pt 0 32)(pt 16 32))
+	)
+	(port
+		(pt 168 32)
+		(output)
+		(text "clk_halved" (rect 0 0 53 12)(font "Arial" ))
+		(text "clk_halved" (rect 103 27 156 39)(font "Arial" ))
+		(line (pt 168 32)(pt 152 32))
+	)
+	(drawing
+		(rectangle (rect 16 16 152 64))
+	)
+)
 (connector
 	(pt 488 232)
 	(pt 544 232)
-)
-(connector
-	(pt 280 232)
-	(pt 360 232)
 )
 (connector
 	(pt 544 232)
@@ -304,4 +306,8 @@ applicable agreement for further details.
 	(text "pixel_column[5]" (rect 370 328 446 340)(font "Arial" ))
 	(pt 360 344)
 	(pt 600 344)
+)
+(connector
+	(pt 280 232)
+	(pt 320 232)
 )
