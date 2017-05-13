@@ -262,10 +262,6 @@ applicable agreement for further details.
 	(pt 488 568)
 )
 (connector
-	(pt 712 568)
-	(pt 752 568)
-)
-(connector
 	(pt 712 584)
 	(pt 744 584)
 )
@@ -284,14 +280,6 @@ applicable agreement for further details.
 (connector
 	(pt 544 552)
 	(pt 544 560)
-)
-(connector
-	(pt 752 568)
-	(pt 752 584)
-)
-(connector
-	(pt 752 584)
-	(pt 848 584)
 )
 (connector
 	(pt 744 584)
@@ -329,4 +317,16 @@ applicable agreement for further details.
 	(text "clk_25MHz" (rect 818 344 871 356)(font "Arial" ))
 	(pt 808 360)
 	(pt 872 360)
+)
+(connector
+	(pt 712 568)
+	(pt 760 568)
+)
+(connector
+	(pt 760 568)
+	(pt 760 584)
+)
+(connector
+	(pt 848 584)
+	(pt 760 584)
 )

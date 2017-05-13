@@ -20,9 +20,9 @@ applicable agreement for further details.
 */
 (header "symbol" (version "1.1"))
 (symbol
-	(rect 16 16 280 128)
+	(rect 16 16 280 160)
 	(text "char_rom" (rect 5 0 45 12)(font "Arial" ))
-	(text "inst" (rect 8 96 20 108)(font "Arial" ))
+	(text "inst" (rect 8 128 20 140)(font "Arial" ))
 	(port
 		(pt 0 32)
 		(input)
@@ -58,7 +58,42 @@ applicable agreement for further details.
 		(text "rom_mux_output" (rect 174 27 243 39)(font "Arial" ))
 		(line (pt 264 32)(pt 248 32)(line_width 1))
 	)
+	(port
+		(pt 264 48)
+		(output)
+		(text "Red" (rect 0 0 17 12)(font "Arial" ))
+		(text "Red" (rect 226 43 243 55)(font "Arial" ))
+		(line (pt 264 48)(pt 248 48)(line_width 1))
+	)
+	(port
+		(pt 264 64)
+		(output)
+		(text "Green" (rect 0 0 24 12)(font "Arial" ))
+		(text "Green" (rect 219 59 243 71)(font "Arial" ))
+		(line (pt 264 64)(pt 248 64)(line_width 1))
+	)
+	(port
+		(pt 264 80)
+		(output)
+		(text "Blue" (rect 0 0 16 12)(font "Arial" ))
+		(text "Blue" (rect 227 75 243 87)(font "Arial" ))
+		(line (pt 264 80)(pt 248 80)(line_width 1))
+	)
+	(port
+		(pt 264 96)
+		(output)
+		(text "Horiz_sync" (rect 0 0 46 12)(font "Arial" ))
+		(text "Horiz_sync" (rect 197 91 243 103)(font "Arial" ))
+		(line (pt 264 96)(pt 248 96)(line_width 1))
+	)
+	(port
+		(pt 264 112)
+		(output)
+		(text "Vert_sync" (rect 0 0 44 12)(font "Arial" ))
+		(text "Vert_sync" (rect 199 107 243 119)(font "Arial" ))
+		(line (pt 264 112)(pt 248 112)(line_width 1))
+	)
 	(drawing
-		(rectangle (rect 16 16 248 96)(line_width 1))
+		(rectangle (rect 16 16 248 128)(line_width 1))
 	)
 )
