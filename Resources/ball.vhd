@@ -11,7 +11,7 @@ PACKAGE de0core IS
  		PORT(clock_25Mhz, red, green, blue	: IN	STD_LOGIC;
          	red_out, green_out, blue_out	: OUT 	STD_LOGIC;
 			horiz_sync_out, vert_sync_out	: OUT 	STD_LOGIC;
-			pixel_row, pixel_column			: OUT STD_LOGIC_VECTOR(9 DOWNTO 0));
+			pixel_row, pixel_column			: OUT STD_LOGIC_VECTOR(10 DOWNTO 0));
 	END COMPONENT;
 END de0core;
 
@@ -36,10 +36,10 @@ architecture behavior of ball is
 			-- Video Display Signals   
 SIGNAL Red_Data, Green_Data, Blue_Data, vert_sync_int,
 		reset, Ball_on, Direction			: std_logic;
-SIGNAL Size 								: std_logic_vector(9 DOWNTO 0);  
-SIGNAL Ball_Y_motion 						: std_logic_vector(9 DOWNTO 0);
-SIGNAL Ball_Y_pos, Ball_X_pos				: std_logic_vector(9 DOWNTO 0);
-SIGNAL pixel_row, pixel_column				: std_logic_vector(9 DOWNTO 0); 
+SIGNAL Size 								: std_logic_vector(10 DOWNTO 0);  
+SIGNAL Ball_X_motion						:	std_logic_vector(10 DOWNTO 0);
+SIGNAL Ball_Y_pos, Ball_X_pos				: std_logic_vector(10 DOWNTO 0);
+SIGNAL pixel_row, pixel_column				: std_logic_vector(10 DOWNTO 0); 
 
 BEGIN           
    SYNC: vga_sync
@@ -49,8 +49,8 @@ BEGIN
 			 	horiz_sync_out => horiz_sync, vert_sync_out => vert_sync_int,
 			 	pixel_row => pixel_row, pixel_column => pixel_column);
 
-Size <= CONV_STD_LOGIC_VECTOR(2,10);	--BALL SIZE HERE
-Ball_X_pos <= CONV_STD_LOGIC_VECTOR(320,10);
+Size <= CONV_STD_LOGIC_VECTOR(8,11);	--BALL SIZE HERE
+Ball_Y_pos <= CONV_STD_LOGIC_VECTOR(20,11);
 
 		-- need internal copy of vert_sync to read
 vert_sync <= vert_sync_int;
@@ -79,14 +79,14 @@ Move_Ball: process
 BEGIN
 			-- Move ball once every vertical sync
 	WAIT UNTIL vert_sync_int'event and vert_sync_int = '1';
-			-- Bounce off top or bottom of screen
-			IF ('0' & Ball_Y_pos) >= CONV_STD_LOGIC_VECTOR(480,10) - Size THEN
-				Ball_Y_motion <= - CONV_STD_LOGIC_VECTOR(2,10);
-			ELSIF Ball_Y_pos <= Size THEN
-				Ball_Y_motion <= CONV_STD_LOGIC_VECTOR(2,10);
+			-- Bounce off left or right of screen
+			IF ('0' & Ball_X_pos) >= CONV_STD_LOGIC_VECTOR(639,11) - Size THEN
+				Ball_X_motion <= - CONV_STD_LOGIC_VECTOR(2,11);
+			ELSIF Ball_X_pos <= Size THEN
+				Ball_X_motion <= CONV_STD_LOGIC_VECTOR(2,11);
 			END IF;
 			-- Compute next ball Y position
-				Ball_Y_pos <= Ball_Y_pos + Ball_Y_motion;
+				Ball_X_pos <= Ball_X_pos + Ball_X_motion;
 END process Move_Ball;
 
 END behavior;
