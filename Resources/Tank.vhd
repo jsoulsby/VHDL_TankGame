@@ -10,7 +10,7 @@ USE work.de0core.all;
 ENTITY Tank IS
 Generic(ADDR_WIDTH: integer := 12; DATA_WIDTH: integer := 1);
 
-   PORT(SIGNAL TB1, TB2, Clock 			: IN std_logic;
+   PORT(SIGNAL SW0,Clock 			: IN std_logic;
 	     SIGNAL Mouse_X_motion, Mouse_Y_motion: IN std_logic_vector(9 DOWNTO 0);
         SIGNAL Red,Green,Blue 			: OUT std_logic;
         SIGNAL Horiz_sync,Vert_sync		: OUT std_logic);		
@@ -52,9 +52,9 @@ BEGIN
 			-- Set Tank_on ='1' to display red Tank
  IF ('0' & Tank_X_pos <= '0' & pixel_column + Size) AND
  			-- compare positive numbers only
- 	('0' & Tank_X_pos + Size >= '0' & '0' & pixel_column) AND
- 	('0' & Tank_Y_pos <= '0' & pixel_row + Size + Size) AND
- 	('0' & Tank_Y_pos + Size +Size >= '0' & pixel_row ) THEN
+ 	('0' & Tank_X_pos + Size >= '0' & pixel_column) AND
+ 	('0' & Tank_Y_pos <= '0' & pixel_row + Size) AND
+	('0' & Tank_Y_pos + Size + CONV_STD_LOGIC_VECTOR(8,10)  >= '0' & pixel_row ) THEN
  		Tank_on <= '1';
   ELSE
  		Tank_on <= '0';
@@ -66,9 +66,13 @@ Move_Tank: process(Mouse_X_motion,vert_sync_int)
 BEGIN
          -- Move Tank depends horizontally depends onmouse
 			if(vert_sync_int'event and vert_sync_int = '1') then
-			   Tank_x_motion <= Mouse_X_motion;
-			   -- Compute next tank x position
-		      Tank_X_pos <= Tank_X_motion;
+			   if(sw0 = '1') then
+				  Tank_X_pos <= CONV_STD_LOGIC_VECTOR(320,10);
+			   else
+			     Tank_X_motion <= Mouse_X_motion;
+			     -- Compute next tank x position
+		        Tank_X_pos <= Tank_X_motion;
+				end if;
 			end if;
 			
 END process Move_Tank;
