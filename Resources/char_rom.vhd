@@ -13,7 +13,7 @@ ENTITY char_rom IS
 		character_address	:	IN STD_LOGIC_VECTOR (5 DOWNTO 0);		--ASCII code of character to be displayed
 		font_row, font_col	:	IN STD_LOGIC_VECTOR (2 DOWNTO 0);
 		clock					: 	IN STD_LOGIC ;
-		pixel_x, pixel_y	:	OUT STD_LOGIC_VECTOR(10	downto 0);
+		pixel_x, pixel_y	:	OUT STD_LOGIC_VECTOR(9	downto 0);
 		rom_mux_output		:	OUT STD_LOGIC;
 		horiz_sync_out		:	OUT STD_LOGIC;
 		vert_sync_out		:	OUT STD_LOGIC;
@@ -87,7 +87,7 @@ BEGIN
 		address_a => rom_address,
 		q_a => rom_data
 	);
-
+	
 	
 	rom_address <= character_address & font_row;
 	rom_mux_output <= rom_data (CONV_INTEGER(NOT font_col(2 DOWNTO 0)));

@@ -50,11 +50,11 @@ Blue_Data <=  NOT Tank_on;
 RGB_Display: Process (Tank_X_pos, Tank_Y_pos, pixel_column, pixel_row, Size)
 BEGIN
 			-- Set Tank_on ='1' to display red Tank
- IF ('0' & Tank_X_pos <= pixel_column + Size) AND
+ IF ('0' & Tank_X_pos <= '0' & pixel_column + Size) AND
  			-- compare positive numbers only
- 	(Tank_X_pos + Size >= '0' & pixel_column) AND
- 	('0' & Tank_Y_pos <= pixel_row + Size + Size) AND
- 	(Tank_Y_pos + Size +Size >= '0' & pixel_row ) THEN
+ 	('0' & Tank_X_pos + Size >= '0' & '0' & pixel_column) AND
+ 	('0' & Tank_Y_pos <= '0' & pixel_row + Size + Size) AND
+ 	('0' & Tank_Y_pos + Size +Size >= '0' & pixel_row ) THEN
  		Tank_on <= '1';
   ELSE
  		Tank_on <= '0';
