@@ -1,5 +1,3 @@
-
-
 LIBRARY ieee;
 USE ieee.std_logic_1164.all;
 USE IEEE.STD_LOGIC_ARITH.all;
@@ -12,14 +10,14 @@ ENTITY char_rom IS
 	PORT
 	(
 		--address			: 	IN STD_LOGIC_VECTOR (8 DOWNTO 0)
-		character_address	:	IN STD_LOGIC_VECTOR (5 DOWNTO 0);
+		character_address	:	IN STD_LOGIC_VECTOR (5 DOWNTO 0);		--ASCII code of character to be displayed
 		font_row, font_col	:	IN STD_LOGIC_VECTOR (2 DOWNTO 0);
-		clock				: 	IN STD_LOGIC ;
-		--q					: 	OUT STD_LOGIC_VECTOR (7 DOWNTO 0)
+		clock					: 	IN STD_LOGIC ;
+		pixel_x, pixel_y	:	OUT STD_LOGIC_VECTOR(10	downto 0);
 		rom_mux_output		:	OUT STD_LOGIC;
-
-     Red,Green,Blue 				: OUT std_logic;
-     Horiz_sync,Vert_sync		: OUT std_logic
+		horiz_sync_out		:	OUT STD_LOGIC;
+		vert_sync_out		:	OUT STD_LOGIC;
+		red,green,blue		:	OUT STD_LOGIC
 	);
 END char_rom;
 
@@ -28,19 +26,17 @@ ARCHITECTURE SYN OF char_rom IS
 
 	SIGNAL rom_data		: STD_LOGIC_VECTOR (7 DOWNTO 0);
 	SIGNAL rom_address	: STD_LOGIC_VECTOR (8 DOWNTO 0);
+	SIGNAL score_on		: STD_LOGIC;
 	
-	-------------------------VGA SYNC SIGNALS---------------------------------
-	SIGNAL pixel_row, pixel_column				: std_logic_vector(10 DOWNTO 0); 
-	SIGNAL Red_Data, Green_Data, Blue_Data, vert_sync_int,
-		reset, Ball_on, Direction			: std_logic;
-		
+
+	
 	COMPONENT vga_sync
  		PORT(clock_25Mhz, red, green, blue	: IN	STD_LOGIC;
          	red_out, green_out, blue_out	: OUT 	STD_LOGIC;
 			horiz_sync_out, vert_sync_out	: OUT 	STD_LOGIC;
 			pixel_row, pixel_column			: OUT STD_LOGIC_VECTOR(10 DOWNTO 0));
 	END COMPONENT;
-	
+
 	COMPONENT altsyncram
 	GENERIC (
 		address_aclr_a			: STRING;
@@ -67,15 +63,7 @@ ARCHITECTURE SYN OF char_rom IS
 
 BEGIN
 	--rom_mux_output	<= sub_wire0(7 DOWNTO 0);
-	
-	------------------------VGA SYNC COMPONENT---------------------------
-	SYNC: vga_sync
- 		PORT MAP(clock_25Mhz => clock, 
-				red => red_data, green => green_data, blue => blue_data,	
-    	     	red_out => red, green_out => green, blue_out => blue,
-			 	horiz_sync_out => horiz_sync, vert_sync_out => vert_sync_int,
-			 	pixel_row => pixel_row, pixel_column => pixel_column);
-				
+		
 				
 	altsyncram_component : altsyncram
 	GENERIC MAP (
@@ -99,6 +87,7 @@ BEGIN
 		address_a => rom_address,
 		q_a => rom_data
 	);
+
 	
 	rom_address <= character_address & font_row;
 	rom_mux_output <= rom_data (CONV_INTEGER(NOT font_col(2 DOWNTO 0)));

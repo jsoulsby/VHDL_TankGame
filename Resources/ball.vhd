@@ -11,7 +11,7 @@ PACKAGE de0core IS
  		PORT(clock_25Mhz, red, green, blue	: IN	STD_LOGIC;
          	red_out, green_out, blue_out	: OUT 	STD_LOGIC;
 			horiz_sync_out, vert_sync_out	: OUT 	STD_LOGIC;
-			pixel_row, pixel_column			: OUT STD_LOGIC_VECTOR(10 DOWNTO 0));
+			pixel_row, pixel_column			: OUT STD_LOGIC_VECTOR(9 DOWNTO 0));
 	END COMPONENT;
 END de0core;
 
@@ -36,10 +36,10 @@ architecture behavior of ball is
 			-- Video Display Signals   
 SIGNAL Red_Data, Green_Data, Blue_Data, vert_sync_int,
 		reset, Ball_on, Direction			: std_logic;
-SIGNAL Size 								: std_logic_vector(10 DOWNTO 0);  
-SIGNAL Ball_X_motion						:	std_logic_vector(10 DOWNTO 0);
-SIGNAL Ball_Y_pos, Ball_X_pos				: std_logic_vector(10 DOWNTO 0);
-SIGNAL pixel_row, pixel_column				: std_logic_vector(10 DOWNTO 0); 
+SIGNAL Size 								: std_logic_vector(9 DOWNTO 0);  
+SIGNAL Ball_X_motion						:	std_logic_vector(9 DOWNTO 0);
+SIGNAL Ball_Y_pos, Ball_X_pos				: std_logic_vector(9 DOWNTO 0);
+SIGNAL pixel_row, pixel_column				: std_logic_vector(9 DOWNTO 0); 
 
 BEGIN           
    SYNC: vga_sync
@@ -49,8 +49,8 @@ BEGIN
 			 	horiz_sync_out => horiz_sync, vert_sync_out => vert_sync_int,
 			 	pixel_row => pixel_row, pixel_column => pixel_column);
 
-Size <= CONV_STD_LOGIC_VECTOR(8,11);	--BALL SIZE HERE
-Ball_Y_pos <= CONV_STD_LOGIC_VECTOR(20,11);
+Size <= CONV_STD_LOGIC_VECTOR(8,10);	--BALL SIZE HERE
+Ball_Y_pos <= CONV_STD_LOGIC_VECTOR(20,10);
 
 		-- need internal copy of vert_sync to read
 vert_sync <= vert_sync_int;
@@ -64,11 +64,11 @@ Blue_Data <=  NOT Ball_on;
 RGB_Display: Process (Ball_X_pos, Ball_Y_pos, pixel_column, pixel_row, Size)
 BEGIN
 			-- Set Ball_on ='1' to display ball
- IF ('0' & Ball_X_pos <= pixel_column + Size) AND
+ IF ('0' & Ball_X_pos <= '0' & pixel_column + Size) AND
  			-- compare positive numbers only
- 	(Ball_X_pos + Size >= '0' & pixel_column) AND
- 	('0' & Ball_Y_pos <= pixel_row + Size) AND
- 	(Ball_Y_pos + Size >= '0' & pixel_row ) THEN
+ 	('0' & Ball_X_pos + Size >= '0' & pixel_column) AND
+ 	('0' & Ball_Y_pos <= '0' & pixel_row + Size) AND
+ 	('0' & Ball_Y_pos + Size >= '0' & pixel_row ) THEN
  		Ball_on <= '1';
  	ELSE
  		Ball_on <= '0';
@@ -80,10 +80,10 @@ BEGIN
 			-- Move ball once every vertical sync
 	WAIT UNTIL vert_sync_int'event and vert_sync_int = '1';
 			-- Bounce off left or right of screen
-			IF ('0' & Ball_X_pos) >= CONV_STD_LOGIC_VECTOR(639,11) - Size THEN
-				Ball_X_motion <= - CONV_STD_LOGIC_VECTOR(2,11);
-			ELSIF Ball_X_pos <= Size THEN
-				Ball_X_motion <= CONV_STD_LOGIC_VECTOR(2,11);
+			IF ('0' & Ball_X_pos) >= '0' & CONV_STD_LOGIC_VECTOR(639,10) - Size THEN
+				Ball_X_motion <= - CONV_STD_LOGIC_VECTOR(2,10);
+			ELSIF ('0' & Ball_X_pos) <= Size THEN
+				Ball_X_motion <= CONV_STD_LOGIC_VECTOR(2,10);
 			END IF;
 			-- Compute next ball Y position
 				Ball_X_pos <= Ball_X_pos + Ball_X_motion;
