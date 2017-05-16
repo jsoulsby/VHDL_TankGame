@@ -6,7 +6,7 @@ USE IEEE.STD_LOGIC_UNSIGNED.all;
 LIBRARY altera_mf;
 USE altera_mf.all;
 
-ENTITY char_rom IS
+ENTITY vga_controller IS
 	PORT
 	(
 		--address			: 	IN STD_LOGIC_VECTOR (8 DOWNTO 0)
@@ -17,10 +17,10 @@ ENTITY char_rom IS
 		PB1, PB2				: 	IN STD_LOGIC;
 		red,green,blue		:	OUT STD_LOGIC
 	);
-END char_rom;
+END vga_controller;
 
 
-ARCHITECTURE SYN OF char_rom IS
+ARCHITECTURE SYN OF vga_controller IS
 	
 	----------------------------------TEXT DISPLAY SIGNALS---------------------------------------
 	SIGNAL rom_data															: STD_LOGIC_VECTOR (7 DOWNTO 0);
