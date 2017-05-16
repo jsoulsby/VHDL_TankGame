@@ -38,7 +38,7 @@ applicable agreement for further details.
 )
 (pin
 	(input)
-	(rect 1192 624 1360 640)
+	(rect 1168 584 1336 600)
 	(text "INPUT" (rect 125 0 153 10)(font "Arial" (font_size 6)))
 	(text "SW0" (rect 5 0 28 12)(font "Arial" ))
 	(pt 168 8)
@@ -851,4 +851,16 @@ applicable agreement for further details.
 (connector
 	(pt 1600 664)
 	(pt 1640 664)
+)
+(connector
+	(pt 1360 632)
+	(pt 1352 632)
+)
+(connector
+	(pt 1352 632)
+	(pt 1352 592)
+)
+(connector
+	(pt 1352 592)
+	(pt 1336 592)
 )
