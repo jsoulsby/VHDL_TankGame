@@ -8,8 +8,8 @@ ENTITY MOUSE IS
         SIGNAL mouse_data				: INOUT std_logic;
         SIGNAL mouse_clk 				: INOUT std_logic;
         SIGNAL left_button, right_button: OUT std_logic;
-		SIGNAL mouse_cursor_row 		: OUT std_logic_vector(10 DOWNTO 0); 
-		SIGNAL mouse_cursor_column 		: OUT std_logic_vector(10 DOWNTO 0));       	
+		SIGNAL mouse_cursor_row 		: OUT std_logic_vector(9 DOWNTO 0); 
+		SIGNAL mouse_cursor_column 		: OUT std_logic_vector(9 DOWNTO 0));       	
 END MOUSE;
 
 ARCHITECTURE behavior OF MOUSE IS
@@ -20,8 +20,8 @@ TYPE STATE_TYPE IS (INHIBIT_TRANS, LOAD_COMMAND,LOAD_COMMAND2, WAIT_OUTPUT_READY
 SIGNAL mouse_state							: state_type;
 SIGNAL inhibit_wait_count					: std_logic_vector(10 DOWNTO 0);
 SIGNAL CHARIN, CHAROUT						: std_logic_vector(7 DOWNTO 0);
-SIGNAL new_cursor_row, new_cursor_column 	: std_logic_vector(10 DOWNTO 0);
-SIGNAL cursor_row, cursor_column 			: std_logic_vector(10 DOWNTO 0);
+SIGNAL new_cursor_row, new_cursor_column 	: std_logic_vector(9 DOWNTO 0);
+SIGNAL cursor_row, cursor_column 			: std_logic_vector(9 DOWNTO 0);
 SIGNAL INCNT, OUTCNT, mSB_OUT 				: std_logic_vector(3 DOWNTO 0);
 SIGNAL PACKET_COUNT 						: std_logic_vector(1 DOWNTO 0);
 SIGNAL SHIFTIN 								: std_logic_vector(8 DOWNTO 0);
@@ -213,10 +213,10 @@ ELSIF MOUSE_CLK_FILTER'event and MOUSE_CLK_FILTER='1' THEN
 		-- PACKET_COUNT = "00" IS ACK COMMAND
 				IF PACKET_COUNT = "00" THEN
 		-- Set Cursor to middle of screen
-				    cursor_column <= CONV_STD_LOGIC_VECTOR(320,11);
+				    cursor_column <= CONV_STD_LOGIC_VECTOR(320,10);
     				cursor_row <= CONV_STD_LOGIC_VECTOR(240,10);
-				    NEW_cursor_column <= CONV_STD_LOGIC_VECTOR(320,11);
-    				NEW_cursor_row <= CONV_STD_LOGIC_VECTOR(240,11);
+				    NEW_cursor_column <= CONV_STD_LOGIC_VECTOR(320,10);
+    				NEW_cursor_row <= CONV_STD_LOGIC_VECTOR(240,10);
 				ELSIF PACKET_COUNT = "01" THEN
 					PACKET_CHAR1 <= SHIFTIN(7 DOWNTO 0);
 	-- Limit Cursor on Screen Edges. Check for left screen limit
@@ -224,20 +224,20 @@ ELSIF MOUSE_CLK_FILTER'event and MOUSE_CLK_FILTER='1' THEN
 	-- Set limits higher since mouse can move up to 128 pixels in one packet
 					IF (cursor_row < 128) AND ((NEW_cursor_row > 256) OR
 						(NEW_cursor_row < 2)) THEN
-						cursor_row <= CONV_STD_LOGIC_VECTOR(0,11);
+						cursor_row <= CONV_STD_LOGIC_VECTOR(0,10);
 			-- Check for right screen limit
 					ELSIF NEW_cursor_row > 480 THEN
-						cursor_row <= CONV_STD_LOGIC_VECTOR(480,11);
+						cursor_row <= CONV_STD_LOGIC_VECTOR(480,10);
 					ELSE
 						cursor_row <= NEW_cursor_row;
 					END IF;
 			-- Check for top screen limit
 					IF (cursor_column < 128)  AND ((NEW_cursor_column > 256)  OR
 						(NEW_cursor_column < 2)) THEN
-						cursor_column <= CONV_STD_LOGIC_VECTOR(0,11);
+						cursor_column <= CONV_STD_LOGIC_VECTOR(0,10);
 			-- Check for bottom screen limit
 					ELSIF NEW_cursor_column > 640 THEN
-						cursor_column <= CONV_STD_LOGIC_VECTOR(640,11);
+						cursor_column <= CONV_STD_LOGIC_VECTOR(640,10);
 					ELSE
 						cursor_column <= NEW_cursor_column;
 					END IF;
