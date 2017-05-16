@@ -12,14 +12,17 @@ ENTITY char_rom IS
 		--address			: 	IN STD_LOGIC_VECTOR (8 DOWNTO 0)
 		pixel_x				:	IN STD_LOGIC_VECTOR (9 DOWNTO 0);		
 		pixel_y				:	IN STD_LOGIC_VECTOR (9 DOWNTO 0);
-		clock					: 	IN STD_LOGIC ;
+		vert_sync_int		:	IN STD_LOGIC;
+		clock					: 	IN STD_LOGIC;
+		PB1, PB2				: 	IN STD_LOGIC;
 		red,green,blue		:	OUT STD_LOGIC
 	);
 END char_rom;
 
 
 ARCHITECTURE SYN OF char_rom IS
-
+	
+	----------------------------------TEXT DISPLAY SIGNALS---------------------------------------
 	SIGNAL rom_data															: STD_LOGIC_VECTOR (7 DOWNTO 0);
 	SIGNAL rom_mux_output													: STD_LOGIC;
 	SIGNAL rom_address														: STD_LOGIC_VECTOR (8 DOWNTO 0);
@@ -27,7 +30,14 @@ ARCHITECTURE SYN OF char_rom IS
 	SIGNAL pix_y, pix_x														: UNSIGNED(9 DOWNTO 0);
 	SIGNAL font_col, font_col_score, font_row, font_row_score	: STD_LOGIC_VECTOR(2 DOWNTO 0);
 	SIGNAL char_address, char_address_score							: STD_LOGIC_VECTOR(5 downto 0);
-
+	
+	
+	-------------------------------- Video Display Signals   -----------------------------------
+	SIGNAL Size 														: std_logic_vector(9 DOWNTO 0);  
+	SIGNAL Ball_X_motion												: std_logic_vector(9 DOWNTO 0);
+	SIGNAL Ball_Y_pos, Ball_X_pos									: std_logic_vector(9 DOWNTO 0);
+	SIGNAL pixel_row, pixel_column								: std_logic_vector(9 DOWNTO 0); 
+	SIGNAL Tank_On, EnemyTank_On									: std_logic;
 	COMPONENT altsyncram
 	GENERIC (
 		address_aclr_a			: STRING;
@@ -81,7 +91,7 @@ BEGIN
 	);
 	
 	score_on <= '1' when
-		pix_y(9 downto 3) = 4
+		pix_y(9 downto 3) = 2
 		and
 		pix_x(9 downto 3) > 3
 		and
@@ -98,11 +108,16 @@ BEGIN
 	"010010" when "0000111",   -- R (22)	
 	"000101" when others;   -- E (05)
 	
-	process(score_on, char_address_score, font_col_score, font_row_score)
+	process(score_on, char_address_score, font_col_score, font_row_score, EnemyTank_On)
 	begin
 	red <= '1';
 	green <= '1';
 	blue <= '1';	
+	if EnemyTank_On = '1' then
+		red <= '0';
+		green <= '0';
+		blue <= '1';
+	end if;
 	if score_on = '1' then
 		char_address <= char_address_score;
 		font_row <= font_row_score;
@@ -113,8 +128,48 @@ BEGIN
 			blue <= '0';
 		end if;
 	end if;
+
+	
 	end process;
 	text_on <= score_on;
 	rom_address <= char_address & font_row;
 	rom_mux_output <= rom_data (CONV_INTEGER(NOT font_col(2 DOWNTO 0)));
+	
+	
+-----------------ENEMY TANK DISPLAY AND PROCESSES-------------------------------	
+	
+Size <= CONV_STD_LOGIC_VECTOR(8,10);	--BALL SIZE HERE
+Ball_Y_pos <= CONV_STD_LOGIC_VECTOR(20,10);
+
+RGB_Display: Process (Ball_X_pos, Ball_Y_pos, pixel_y, pixel_x, Size)
+BEGIN
+			-- Set EnemyTank_On ='1' to display ball
+ IF ('0' & Ball_X_pos <= '0' & pixel_y + Size) AND
+ 			-- compare positive numbers only
+ 	('0' & Ball_X_pos + Size >= '0' & pixel_y) AND
+ 	('0' & Ball_Y_pos <= '0' & pixel_x + Size) AND
+ 	('0' & Ball_Y_pos + Size >= '0' & pixel_x ) THEN
+ 		EnemyTank_On <= '1';
+ 	ELSE
+ 		EnemyTank_On <= '0';
+END IF;
+END process RGB_Display;
+
+Move_Ball: process
+BEGIN
+			-- Move ball once every vertical sync
+	WAIT UNTIL vert_sync_int'event and vert_sync_int = '1';
+			-- Bounce off left or right of screen
+			IF ('0' & Ball_X_pos) >= '0' & CONV_STD_LOGIC_VECTOR(639,10) - Size THEN
+				Ball_X_motion <= - "0000000010"; -- negative 2
+			ELSIF ('0' & Ball_X_pos) <= Size THEN
+				Ball_X_motion <= CONV_STD_LOGIC_VECTOR(2,10);
+			END IF;
+			-- Compute next ball Y position
+			   IF(PB1 = '0' OR PB2 = '0') then
+				  Ball_X_pos <= Ball_X_pos + Ball_X_motion + Ball_X_motion + Ball_X_motion;
+				ELSE
+				  Ball_X_pos <= Ball_X_pos + Ball_X_motion;
+				END IF;
+END process Move_Ball;
 END SYN;
