@@ -96,7 +96,7 @@ BEGIN
 		address_aclr_a => "NONE",
 		clock_enable_input_a => "BYPASS",
 		clock_enable_output_a => "BYPASS",
-		init_file => "tcgrom.mif",
+		init_file => "tcgrom2.mif",
 		intended_device_family => "Cyclone III",
 		lpm_hint => "ENABLE_RUNTIME_MOD=NO",
 		lpm_type => "altsyncram",
@@ -134,8 +134,8 @@ BEGIN
 	
 	-------------------use bullet shape in mif file-----------
 	char_address_bullet <= "111111"; -- swapped out 'F' for bullet shape in mif file (77)
-	font_row_bullet <= STD_LOGIC_VECTOR(pix_y(3 downto 1));
-	font_col_bullet <= STD_LOGIC_VECTOR(pix_x(3 downto 1));
+	font_row_bullet <= STD_LOGIC_VECTOR(pix_y(2 downto 0));
+	font_col_bullet <= STD_LOGIC_VECTOR(pix_x(2 downto 0));
 	
 	process(score_on, char_address_score, font_col_score, font_row_score, EnemyTank_On, PlayerTank_On, bullet_on)
 	begin
@@ -253,7 +253,7 @@ BEGIN
 			
 END process Move_Tank;
 
-bullet_Size <= CONV_STD_LOGIC_VECTOR(3,10);
+bullet_Size <= CONV_STD_LOGIC_VECTOR(5,10);
 bullet_motion <= CONV_STD_LOGIC_VECTOR(10,10);
 
 Tank_Shoot: process(vert_sync_int, bullet_motion, mouse_left_click)
@@ -261,15 +261,15 @@ BEGIN
 			if(vert_sync_int'event and vert_sync_int = '1') then
 				if(bullet_fired = '0' and mouse_left_click = '1') then
 						bullet_fired <= '1';
-						bullet_X_Pos <= Player_X_Pos;
 						bullet_Y_Pos <= CONV_STD_LOGIC_VECTOR(410, 10); --hard coded to be just above player tank
+						bullet_X_Pos <= player_X_Pos;
 				end if;
 				--check if bullet hits enemy
 				if (bullet_fired = '1') then
 					IF ('0' & bullet_X_Pos <= '0' & Enemy_X_pos + Enemy_Size + bullet_Size) AND
-						('0' & bullet_X_Pos + bullet_Size >= '0' & Enemy_X_pos + Enemy_Size) AND
+						('0' & bullet_X_Pos + bullet_Size >= '0' & Enemy_X_pos) AND
 						('0' & bullet_Y_Pos <= '0' & Enemy_Y_pos + Enemy_Size + bullet_Size) AND
-						('0' & bullet_Y_Pos + bullet_Size >= '0' & Enemy_X_Pos + Enemy_Size) THEN
+						('0' & bullet_Y_Pos + bullet_Size >= '0' & Enemy_Y_Pos) THEN
 						gameScore <= gameScore + 1;
 						bullet_fired <= '0';
 					-------------------check if bullet misses enemy
