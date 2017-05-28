@@ -53,6 +53,9 @@ ARCHITECTURE SYN OF vga_controller IS
 	SIGNAL Enemy_X_motion_incrementer									: integer := 2;	
 	SIGNAL Enemy_Y_pos, Enemy_X_pos										: STD_LOGIC_VECTOR(9 DOWNTO 0);
 	SIGNAL EnemyTank_On														: STD_LOGIC;
+	SIGNAL counter																: positive := 10;
+	SIGNAL rng_direction														: STD_LOGIC;
+	SIGNAL enemy_fsm															: STD_LOGIC_VECTOR(1 DOWNTO 0) := "00";
 	
 	------------------------------- Player Tank Display Signals -----------------------------------
 	SIGNAL Player_Size														: STD_LOGIC_VECTOR(9 DOWNTO 0);
@@ -131,7 +134,7 @@ BEGIN
 
 Screen_Display:process(pix_x, pix_y) 
 begin
-    if pix_y(9 downto 3) >= 28 and pix_y(9 downto 3) <= 31 and pix_x(9 downto 3) >= 16 and pix_x(9 downto 3) <= 63 then
+    if pix_y(9 downto 3) >= 22 and pix_y(9 downto 3) <= 25 and pix_x(9 downto 3) >= 16 and pix_x(9 downto 3) <= 63 then
 	    screen_on <= '1';
 	 else 
 	    screen_on <= '0';
@@ -280,8 +283,8 @@ begin
 	end case;	
 end process;
 	
-	timer1 <= timer1_in;
-	timer0 <= timer10_in;
+	timer0 <= timer1_in;
+	timer1 <= timer10_in;
 	-------------------use bullet shape in mif file-----------
 	char_address_bullet <= "111111"; -- swapped out 'F' for bullet shape in mif file (77)
 	font_row_bullet <= STD_LOGIC_VECTOR(pix_y(2 downto 0));
@@ -302,8 +305,7 @@ end process;
 		   blue <= '0';
 		   green <= '0';
 		end if;
-	end if;
-	
+	end if;	
 	if PlayerTank_On = '1' then
 		red  <= '1';
 		green <= '0';
@@ -377,18 +379,28 @@ Move_Enemy: process
 BEGIN
 			-- Move enemy once every vertical sync
 	WAIT UNTIL vert_sync_int'event and vert_sync_int = '1';
-			-- Bounce off left or right of screen
-			IF ('0' & Enemy_X_pos) >= '0' & CONV_STD_LOGIC_VECTOR(639,10) - Enemy_Size THEN
-				Enemy_X_motion <=  CONV_STD_LOGIC_VECTOR(-Enemy_X_motion_incrementer,10); -- negative 2
-			ELSIF ('0' & Enemy_X_pos) <= Enemy_Size THEN
-				Enemy_X_motion <= CONV_STD_LOGIC_VECTOR(Enemy_X_motion_incrementer,10);
-			END IF;
-			-- Compute next enemy Y position
-			IF(PB1 = '0' OR PB2 = '0') then
-				Enemy_X_pos <= Enemy_X_pos + Enemy_X_motion + Enemy_X_motion;
-			ELSE
-				Enemy_X_pos <= Enemy_X_pos + Enemy_X_motion;
-			END IF;			
+		
+		case enemy_fsm is
+			when "00" =>
+				-- Bounce off left or right of screen
+				IF ('0' & Enemy_X_pos) >= '0' & CONV_STD_LOGIC_VECTOR(639,10) - Enemy_Size THEN
+					Enemy_X_motion <=  CONV_STD_LOGIC_VECTOR(-Enemy_X_motion_incrementer,10); -- negative 2
+				ELSIF ('0' & Enemy_X_pos) <= Enemy_Size THEN
+					Enemy_X_motion <= CONV_STD_LOGIC_VECTOR(Enemy_X_motion_incrementer,10);
+				END IF;
+				-- Compute next enemy Y position
+				IF(PB1 = '0' OR PB2 = '0') then
+					Enemy_X_pos <= Enemy_X_pos + Enemy_X_motion + Enemy_X_motion;
+				ELSE
+					Enemy_X_pos <= Enemy_X_pos + Enemy_X_motion;
+				END IF;					
+			when others =>
+				Enemy_X_Pos <= CONV_STD_LOGIC_VECTOR(counter, 10);
+					if (rng_direction = '1') then
+						Enemy_X_motion <= CONV_STD_LOGIC_VECTOR(Enemy_X_motion_incrementer,10);
+					end if;
+		end case;
+			
 END process Move_Enemy;
 
 
@@ -438,6 +450,7 @@ BEGIN
 					gameScore100 <= "0000";
 					bullet_fired <= '0';
 				else 
+					enemy_fsm <= "00";
 					if(bullet_fired = '0' and mouse_left_click = '1') then
 							bullet_fired <= '1';
 							bullet_Y_Pos <= CONV_STD_LOGIC_VECTOR(410, 10); --hard coded to be just above player tank
@@ -466,7 +479,7 @@ BEGIN
 							else
 								gamescore1 <= gameScore1 + 1;
 							end if;
-	
+							enemy_fsm <= "01";
 						----------------------------allow bullets to fire again----------------------
 							bullet_fired <= '0';
 						-------------------check if bullet misses enemy------------------------------
@@ -475,6 +488,7 @@ BEGIN
 						ELSE
 							-- Compute next bullet Y position
 							bullet_Y_pos <= bullet_Y_Pos - bullet_motion;
+							enemy_fsm <= "00";
 						end if;
 					end if;
 				end if;
@@ -502,4 +516,20 @@ BEGIN
 		END IF;
 	end if;
 END process RGB_Display_Bullet;
+
+RNG_Enemy_Position: process (clock)
+		BEGIN
+			if (clock'event and clock = '1') then
+				if (counter > 620) then
+					counter <= 20;
+				else
+					counter <= counter + 1;
+				end if;
+				if (counter mod 2 = 0) then
+					rng_direction <= '1';
+				else
+					rng_direction <= '0';
+				end if;
+			end if;
+end process RNG_Enemy_Position;
 END SYN;

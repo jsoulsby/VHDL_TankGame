@@ -5,7 +5,7 @@ use IEEE.std_logic_unsigned.all;
 entity BCD_Counter1 is
 	port(Clk, Enable : in std_logic;
 	     Q : out std_logic_vector(3 downto 0));
-end entity BCD_Counter;
+end entity BCD_Counter1;
 
 architecture beh of BCD_Counter1 is
 signal s_Q : std_logic_vector(3 downto 0) := "0000";

@@ -72,7 +72,7 @@ applicable agreement for further details.
 )
 (pin
 	(input)
-	(rect 88 280 256 296)
+	(rect -248 280 -80 296)
 	(text "INPUT" (rect 125 0 153 10)(font "Arial" (font_size 6)))
 	(text "SW0" (rect 5 0 28 12)(font "Arial" ))
 	(pt 168 8)
@@ -85,7 +85,7 @@ applicable agreement for further details.
 		(line (pt 109 12)(pt 113 8))
 	)
 	(text "VCC" (rect 128 7 148 17)(font "Arial" (font_size 6)))
-	(annotation_block (location)(rect 32 280 80 296))
+	(annotation_block (location)(rect -304 280 -256 296))
 )
 (pin
 	(output)
@@ -1027,10 +1027,6 @@ applicable agreement for further details.
 	(pt 264 432)
 )
 (connector
-	(pt 288 288)
-	(pt 256 288)
-)
-(connector
 	(text "mouse_col[9..0]" (rect 136 296 215 308)(font "Arial" ))
 	(pt 288 304)
 	(pt 216 304)
@@ -1136,3 +1132,20 @@ applicable agreement for further details.
 	(pt 288 464)
 	(bus)
 )
+(connector
+	(pt 456 80)
+	(pt -40 80)
+)
+(connector
+	(pt -40 80)
+	(pt -40 288)
+)
+(connector
+	(pt -80 288)
+	(pt -40 288)
+)
+(connector
+	(pt -40 288)
+	(pt 288 288)
+)
+(junction (pt -40 288))
