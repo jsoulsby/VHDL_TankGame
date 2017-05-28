@@ -11,57 +11,78 @@ Entity FSM is
          --pb1
          Reset:         in std_logic;
 			--pb2
-		   Pause:         in std_logic;
+		   Quit:         in std_logic;
+			leveltime:     in integer;
 			right_click:   in std_logic;
          left_click:    in std_logic;
-			--sw0
-			level2:        in std_logic;
+			-- slide switch 
+			SW0:           in std_logic;
 			--sw1
-			level3:        in std_logic;
-			--Score: in std_logic_vector (3 downto 0);
+		   SW1:           in std_logic;
+			--sw1
+			SW2:           in std_logic;
+			Score:         in std_logic_vector (3 downto 0);
 			Enable:        out std_logic;
-			Fire:          out std_logic;
-			level:         out integer;
-			displayidle:   out std_logic;
-			Freeze:        out std_logic
-  );
+			-- 0 is traning mode, 9 is game failed, 10 is idle start screen
+			Mode:          out integer
+);
   
 End FSM;
 
 Architecture behav of FSM is
 
-Type state_type is (idle,game,pausegame);
+Type state_type is (idle,level0,level1,level2,wingame,gamefailed);
 Signal y: state_type;
-
+ 
 begin
   process(clk,reset)
   begin
-    if (reset = '0') then
+    if (Reset = '0') then
 	   y <= idle; 
+	 elsif(SW0 = '1') then
+	   y <= level0;
+	 elsif(SW1 = '1') then
+	   y <= level1;
+	 elsif(SW2 = '1') then
+	   y <= level2;
+	 elsif (Quit = '0') then
+	   y <= wingame;
 	 elsif (rising_edge(clk)) then
 	   case y is 
-	   when idle =>
-	      displayidle <= '1';
-		   if (right_click = '1' OR left_click = '1') then
-		     y <= game; 
-		   end if;
-	   when game =>
-		   if(left_click = '1' OR right_click = '1')then
-			  Fire <= '1'; 
-		     if (level2 = '1') then
-			    level <= 2;
-			  elsif (level3 = '1') then
-			    level <= 3;
-		     elsif (Pause = '1') then
-			    y <= pausegame;
-			  end if;
-			end if;
-		when pausegame =>
-		  Freeze <= '1';
-		end case;
+	     when idle =>
+	       Mode <= 10;
+		    if (left_click = '1') then
+		      y <= level1;
+		    elsif (right_click = '1') then
+			   y <= level0;
+			 end if;
+	     when level0 =>
+		    Mode <= 0;
+		  when level1 =>
+		    mode <= 1;
+		    if (score > 10) then
+			   y <= level2;
+			 elsif (score <= 10 and leveltime = 0) then
+			   y <= gamefailed;
+			 end if;
+		  when level2 =>
+		    mode <= 2;
+			 if (score > 50) then
+			   y <= idle; 
+			 end if;
+		  when gamefailed =>
+		    mode <= 9;
+			 if (right_click = '1' or left_click = '1') then
+			   y <= idle;
+			 end if;
+		  when wingame =>
+		      mode <= 10;
+				if (right_click = '1' or left_click = '1') then
+		        y <= idle;
+				end if;
+		  end case;
 	 end if;
-	end process;
-	
+  end process;
 end behav; 
 
 
