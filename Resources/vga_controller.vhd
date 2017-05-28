@@ -84,6 +84,10 @@ ARCHITECTURE SYN OF vga_controller IS
 	SIGNAL char_address_bullet												: STD_LOGIC_VECTOR(5 DOWNTO 0);
 	SIGNAL bulx, buly															: STD_LOGIC_VECTOR(9 DOWNTO 0);
 	
+	-------------------------------- Memory Latches --------------------------------------------------
+	SIGNAL timer10_latch, timer1_latch									: STD_LOGIC_VECTOR(3 DOWNTO 0);
+	SIGNAL score100_latch, score10_latch, score1_latch				: STD_LOGIC_VECTOR(3 DOWNTO 0);
+	SIGNAL mode_latch															: STD_LOGIC_VECTOR(2 DOWNTO 0);
 	--------------------------------------------------------------------------------------------------
 	COMPONENT altsyncram
 	GENERIC (
@@ -139,155 +143,394 @@ BEGIN
 
 Screen_Display:process(pix_x, pix_y) 
 begin
-    if pix_y(9 downto 3) >= 16 and pix_y(9 downto 3) <= 19 and pix_x(9 downto 3) >= 16 and pix_x(9 downto 3) <= 63 then
-	    screen_on <= '1';
-	 else 
-	    screen_on <= '0';
-	 end if;
-	 font_row_screen <= STD_LOGIC_VECTOR(pix_y(4 downto 2));
-	 font_col_screen <= STD_LOGIC_VECTOR(pix_x(4 downto 2));
-	 if pix_x(9 downto 3) >= 16 and pix_x(9 downto 3) <= 19 then
-	    char_address_screen <= "010100";  -- T 
-    elsif pix_x(9 downto 3) >= 20 and pix_x(9 downto 3) <= 23 then
-		  char_address_screen <= "000001"; -- A 
-    elsif pix_x(9 downto 3) >= 24 and pix_x(9 downto 3) <= 27 then
-        char_address_screen <= "001110"; -- N 
-	 elsif pix_x(9 downto 3) >= 28 and pix_x(9 downto 3) <= 31 then
-	     char_address_screen <= "001011"; -- K 
-	 elsif pix_x(9 downto 3) >= 32 and pix_x(9 downto 3) <= 35 then
-	     char_address_screen <= "100000"; -- space
-	 elsif pix_x(9 downto 3) >= 36 and pix_x(9 downto 3) <= 39 then
-	     char_address_screen <= "001000"; --H (8)
-	 elsif pix_x(9 downto 3) >= 40 and pix_x(9 downto 3) <= 43 then
-	     char_address_screen <= "010101"; --U (21)
-	 elsif pix_x(9 downto 3) >= 44 and pix_x(9 downto 3) <= 47 then
-	     char_address_screen <= "001110"; --N 
-	 elsif pix_x(9 downto 3) >= 48 and pix_x(9 downto 3) <= 51 then
-	     char_address_screen <= "010100"; --T
-	 elsif pix_x(9 downto 3) >= 52 and pix_x(9 downto 3) <= 55 then
-	     char_address_screen <= "001001"; --I
-	 elsif pix_x(9 downto 3) >= 56 and pix_x(9 downto 3) <= 59 then
-	     char_address_screen <= "001110"; -- N
-	 elsif pix_x(9 downto 3) >= 60 and pix_x(9 downto 3) <= 63 then
-	     char_address_screen <= "000111"; -- G
-	 end if;
+	 case game_status is
+		when "000" =>
+			 if pix_y(9 downto 3) >= 16 and pix_y(9 downto 3) <= 19 and pix_x(9 downto 3) >= 16 and pix_x(9 downto 3) <= 63 then
+				 screen_on <= '1';
+			 else 
+				 screen_on <= '0';
+			 end if;
+			 font_row_screen <= STD_LOGIC_VECTOR(pix_y(4 downto 2));
+			 font_col_screen <= STD_LOGIC_VECTOR(pix_x(4 downto 2));
+			 if pix_x(9 downto 3) >= 16 and pix_x(9 downto 3) <= 19 then
+				 char_address_screen <= "010100";  -- T 
+			 elsif pix_x(9 downto 3) >= 20 and pix_x(9 downto 3) <= 23 then
+				  char_address_screen <= "000001"; -- A 
+			 elsif pix_x(9 downto 3) >= 24 and pix_x(9 downto 3) <= 27 then
+				  char_address_screen <= "001110"; -- N 
+			 elsif pix_x(9 downto 3) >= 28 and pix_x(9 downto 3) <= 31 then
+				  char_address_screen <= "001011"; -- K 
+			 elsif pix_x(9 downto 3) >= 32 and pix_x(9 downto 3) <= 35 then
+				  char_address_screen <= "100000"; -- space
+			 elsif pix_x(9 downto 3) >= 36 and pix_x(9 downto 3) <= 39 then
+				  char_address_screen <= "001000"; --H (8)
+			 elsif pix_x(9 downto 3) >= 40 and pix_x(9 downto 3) <= 43 then
+				  char_address_screen <= "010101"; --U (21)
+			 elsif pix_x(9 downto 3) >= 44 and pix_x(9 downto 3) <= 47 then
+				  char_address_screen <= "001110"; --N 
+			 elsif pix_x(9 downto 3) >= 48 and pix_x(9 downto 3) <= 51 then
+				  char_address_screen <= "010100"; --T
+			 elsif pix_x(9 downto 3) >= 52 and pix_x(9 downto 3) <= 55 then
+				  char_address_screen <= "001001"; --I
+			 elsif pix_x(9 downto 3) >= 56 and pix_x(9 downto 3) <= 59 then
+				  char_address_screen <= "001110"; -- N
+			 elsif pix_x(9 downto 3) >= 60 and pix_x(9 downto 3) <= 63 then
+				  char_address_screen <= "000111"; -- G
+			 end if;
+		when others =>
+			screen_on <= '0';	
+	end case;
 end process;
 
 Score_Display: Process(pix_x, pix_y)
 begin
-	if pix_y(9 downto 3) = 1 and pix_x(9 downto 3) > 3 and pix_x(9 downto 3) < 13 then
-		score_on <= '1';
-	else
-		score_on <= '0';
-	end if;
-	font_row_score <= STD_LOGIC_VECTOR(pix_y(2 downto 0));
-	font_col_score <= STD_LOGIC_VECTOR(pix_x(2 downto 0));
-	case pix_x(9 downto 3) is
-		when "0000100" =>
-			char_address_score <= "010011";  -- S (23)	(when at index 4)
-		when "0000101" =>
-			char_address_score <= "000011";	-- C (03)	(when at index 5)
-		when "0000110" =>
-			char_address_score <= "001111";	-- O (17)	(when at index 6)	 
-		when "0000111" =>   	
-			char_address_score <= "010010";	-- R (22)	(when at index 7)
-		when "0001000" =>  		
-			char_address_score <= "000101";	-- E (05)	(when at index 8)
-		when "0001001" =>  		
-			char_address_score <= "100000";	--   (40)   (when at index 9)	
-		when "0001010" =>
-			case gameScore100 is
-				when "0000" => char_address_score <= "110000";
-				when "0001" => char_address_score <= "110001";
-				when "0010" => char_address_score <= "110010";
-				when "0011" => char_address_score <= "110011";
-				when "0100" => char_address_score <= "110100";
-				when "0101" => char_address_score <= "110101";
-				when "0110" => char_address_score <= "110110";
-				when "0111" => char_address_score <= "110111";
-				when "1000" => char_address_score <= "111000";
-				when others => char_address_score <= "111001";
+	case game_status is 
+		when "000" =>
+			score_on <= '0';
+		when "001" =>
+		---------------------------TRAINING ON--------------------------------------
+			if pix_y(9 downto 3) = 1 and pix_x(9 downto 3) > 3 and pix_x(9 downto 3) < 13 then
+				score_on <= '1';
+			else
+				score_on <= '0';
+			end if;
+			font_row_score <= STD_LOGIC_VECTOR(pix_y(2 downto 0));
+			font_col_score <= STD_LOGIC_VECTOR(pix_x(2 downto 0));
+			case pix_x(9 downto 3) is
+				when "0000100" =>
+					char_address_score <= "010011";  -- S (23)	(when at index 4)
+				when "0000101" =>
+					char_address_score <= "000011";	-- C (03)	(when at index 5)
+				when "0000110" =>
+					char_address_score <= "001111";	-- O (17)	(when at index 6)	 
+				when "0000111" =>   	
+					char_address_score <= "010010";	-- R (22)	(when at index 7)
+				when "0001000" =>  		
+					char_address_score <= "000101";	-- E (05)	(when at index 8)
+				when "0001001" =>  		
+					char_address_score <= "100000";	--   (40)   (when at index 9)	
+				when "0001010" =>
+					case gameScore100 is
+						when "0000" => char_address_score <= "110000";
+						when "0001" => char_address_score <= "110001";
+						when "0010" => char_address_score <= "110010";
+						when "0011" => char_address_score <= "110011";
+						when "0100" => char_address_score <= "110100";
+						when "0101" => char_address_score <= "110101";
+						when "0110" => char_address_score <= "110110";
+						when "0111" => char_address_score <= "110111";
+						when "1000" => char_address_score <= "111000";
+						when others => char_address_score <= "111001";
+					end case;
+				when "0001011" =>
+					case gameScore10 is
+						when "0000" => char_address_score <= "110000";
+						when "0001" => char_address_score <= "110001";
+						when "0010" => char_address_score <= "110010";
+						when "0011" => char_address_score <= "110011";
+						when "0100" => char_address_score <= "110100";
+						when "0101" => char_address_score <= "110101";
+						when "0110" => char_address_score <= "110110";
+						when "0111" => char_address_score <= "110111";
+						when "1000" => char_address_score <= "111000";
+						when others => char_address_score <= "111001";
+					end case;		
+				when others =>
+				case gameScore1 is
+						when "0000" => char_address_score <= "110000";
+						when "0001" => char_address_score <= "110001";
+						when "0010" => char_address_score <= "110010";
+						when "0011" => char_address_score <= "110011";
+						when "0100" => char_address_score <= "110100";
+						when "0101" => char_address_score <= "110101";
+						when "0110" => char_address_score <= "110110";
+						when "0111" => char_address_score <= "110111";
+						when "1000" => char_address_score <= "111000";
+						when others => char_address_score <= "111001";
+				end case;	
 			end case;
-		when "0001011" =>
-			case gameScore10 is
-				when "0000" => char_address_score <= "110000";
-				when "0001" => char_address_score <= "110001";
-				when "0010" => char_address_score <= "110010";
-				when "0011" => char_address_score <= "110011";
-				when "0100" => char_address_score <= "110100";
-				when "0101" => char_address_score <= "110101";
-				when "0110" => char_address_score <= "110110";
-				when "0111" => char_address_score <= "110111";
-				when "1000" => char_address_score <= "111000";
-				when others => char_address_score <= "111001";
-			end case;		
+		---------------------------LEVEL 1 ON--------------------------------------
+		when "010" =>
+			if pix_y(9 downto 3) = 1 and pix_x(9 downto 3) > 3 and pix_x(9 downto 3) < 13 then
+				score_on <= '1';
+			else
+				score_on <= '0';
+			end if;
+			font_row_score <= STD_LOGIC_VECTOR(pix_y(2 downto 0));
+			font_col_score <= STD_LOGIC_VECTOR(pix_x(2 downto 0));
+			case pix_x(9 downto 3) is
+				when "0000100" =>
+					char_address_score <= "010011";  -- S (23)	(when at index 4)
+				when "0000101" =>
+					char_address_score <= "000011";	-- C (03)	(when at index 5)
+				when "0000110" =>
+					char_address_score <= "001111";	-- O (17)	(when at index 6)	 
+				when "0000111" =>   	
+					char_address_score <= "010010";	-- R (22)	(when at index 7)
+				when "0001000" =>  		
+					char_address_score <= "000101";	-- E (05)	(when at index 8)
+				when "0001001" =>  		
+					char_address_score <= "100000";	--   (40)   (when at index 9)	
+				when "0001010" =>
+					case gameScore100 is
+						when "0000" => char_address_score <= "110000";
+						when "0001" => char_address_score <= "110001";
+						when "0010" => char_address_score <= "110010";
+						when "0011" => char_address_score <= "110011";
+						when "0100" => char_address_score <= "110100";
+						when "0101" => char_address_score <= "110101";
+						when "0110" => char_address_score <= "110110";
+						when "0111" => char_address_score <= "110111";
+						when "1000" => char_address_score <= "111000";
+						when others => char_address_score <= "111001";
+					end case;
+				when "0001011" =>
+					case gameScore10 is
+						when "0000" => char_address_score <= "110000";
+						when "0001" => char_address_score <= "110001";
+						when "0010" => char_address_score <= "110010";
+						when "0011" => char_address_score <= "110011";
+						when "0100" => char_address_score <= "110100";
+						when "0101" => char_address_score <= "110101";
+						when "0110" => char_address_score <= "110110";
+						when "0111" => char_address_score <= "110111";
+						when "1000" => char_address_score <= "111000";
+						when others => char_address_score <= "111001";
+					end case;		
+				when others =>
+				case gameScore1 is
+						when "0000" => char_address_score <= "110000";
+						when "0001" => char_address_score <= "110001";
+						when "0010" => char_address_score <= "110010";
+						when "0011" => char_address_score <= "110011";
+						when "0100" => char_address_score <= "110100";
+						when "0101" => char_address_score <= "110101";
+						when "0110" => char_address_score <= "110110";
+						when "0111" => char_address_score <= "110111";
+						when "1000" => char_address_score <= "111000";
+						when others => char_address_score <= "111001";
+				end case;	
+			end case;
+		---------------------------LEVEL 2 ON--------------------------------------
+		when "011" => 
+			if pix_y(9 downto 3) = 1 and pix_x(9 downto 3) > 3 and pix_x(9 downto 3) < 13 then
+				score_on <= '1';
+			else
+				score_on <= '0';
+			end if;
+			font_row_score <= STD_LOGIC_VECTOR(pix_y(2 downto 0));
+			font_col_score <= STD_LOGIC_VECTOR(pix_x(2 downto 0));
+			case pix_x(9 downto 3) is
+				when "0000100" =>
+					char_address_score <= "010011";  -- S (23)	(when at index 4)
+				when "0000101" =>
+					char_address_score <= "000011";	-- C (03)	(when at index 5)
+				when "0000110" =>
+					char_address_score <= "001111";	-- O (17)	(when at index 6)	 
+				when "0000111" =>   	
+					char_address_score <= "010010";	-- R (22)	(when at index 7)
+				when "0001000" =>  		
+					char_address_score <= "000101";	-- E (05)	(when at index 8)
+				when "0001001" =>  		
+					char_address_score <= "100000";	--   (40)   (when at index 9)	
+				when "0001010" =>
+					case gameScore100 is
+						when "0000" => char_address_score <= "110000";
+						when "0001" => char_address_score <= "110001";
+						when "0010" => char_address_score <= "110010";
+						when "0011" => char_address_score <= "110011";
+						when "0100" => char_address_score <= "110100";
+						when "0101" => char_address_score <= "110101";
+						when "0110" => char_address_score <= "110110";
+						when "0111" => char_address_score <= "110111";
+						when "1000" => char_address_score <= "111000";
+						when others => char_address_score <= "111001";
+					end case;
+				when "0001011" =>
+					case gameScore10 is
+						when "0000" => char_address_score <= "110000";
+						when "0001" => char_address_score <= "110001";
+						when "0010" => char_address_score <= "110010";
+						when "0011" => char_address_score <= "110011";
+						when "0100" => char_address_score <= "110100";
+						when "0101" => char_address_score <= "110101";
+						when "0110" => char_address_score <= "110110";
+						when "0111" => char_address_score <= "110111";
+						when "1000" => char_address_score <= "111000";
+						when others => char_address_score <= "111001";
+					end case;		
+				when others =>
+				case gameScore1 is
+						when "0000" => char_address_score <= "110000";
+						when "0001" => char_address_score <= "110001";
+						when "0010" => char_address_score <= "110010";
+						when "0011" => char_address_score <= "110011";
+						when "0100" => char_address_score <= "110100";
+						when "0101" => char_address_score <= "110101";
+						when "0110" => char_address_score <= "110110";
+						when "0111" => char_address_score <= "110111";
+						when "1000" => char_address_score <= "111000";
+						when others => char_address_score <= "111001";
+				end case;	
+			end case;
 		when others =>
-		case gameScore1 is
-				when "0000" => char_address_score <= "110000";
-				when "0001" => char_address_score <= "110001";
-				when "0010" => char_address_score <= "110010";
-				when "0011" => char_address_score <= "110011";
-				when "0100" => char_address_score <= "110100";
-				when "0101" => char_address_score <= "110101";
-				when "0110" => char_address_score <= "110110";
-				when "0111" => char_address_score <= "110111";
-				when "1000" => char_address_score <= "111000";
-				when others => char_address_score <= "111001";
-		end case;	
-	end case;	
+			score_on <= '0';
+	end case;
 end process;
 
 Timer_Display: Process(pix_x, pix_y)
-begin
-	if pix_y(9 downto 3) = 1 and pix_x(9 downto 3) > 66 and pix_x(9 downto 3) < 74 then
-		time_on <= '1';
-	else
-		time_on <= '0';
-	end if;
-	font_row_timer <= STD_LOGIC_VECTOR(pix_y(2 downto 0));
-	font_col_timer <= STD_LOGIC_VECTOR(pix_x(2 downto 0));
-	case pix_x(9 downto 3) is
-		when "1000011" =>
-			char_address_timer <= "010100";  -- T (24)	(when at index 67)
-		when "1000100" =>
-			char_address_timer <= "001001";	-- I (11)	(when at index 68)
-		when "1000101" =>
-			char_address_timer <= "001101";	-- M (15)	(when at index 69)	 
-		when "1000110" =>   	
-			char_address_timer <= "000101";	-- E (05)	(when at index 70)
-		when "1000111" =>  		
-			char_address_timer <= "100000";	--   (40)	(when at index 71)
-		when "1001000" =>
-		case timer1 is
-				when "0000" => char_address_timer <= "110000";
-				when "0001" => char_address_timer <= "110001";
-				when "0010" => char_address_timer <= "110010";
-				when "0011" => char_address_timer <= "110011";
-				when "0100" => char_address_timer <= "110100";
-				when "0101" => char_address_timer <= "110101";
-				when "0110" => char_address_timer <= "110110";
-				when "0111" => char_address_timer <= "110111";
-				when "1000" => char_address_timer <= "111000";
-				when others => char_address_timer <= "111001";
-		end case;
-		when "1001001" =>
-			case timer0 is
-				when "0000" => char_address_timer <= "110000";
-				when "0001" => char_address_timer <= "110001";
-				when "0010" => char_address_timer <= "110010";
-				when "0011" => char_address_timer <= "110011";
-				when "0100" => char_address_timer <= "110100";
-				when "0101" => char_address_timer <= "110101";
-				when "0110" => char_address_timer <= "110110";
-				when "0111" => char_address_timer <= "110111";
-				when "1000" => char_address_timer <= "111000";
-				when others => char_address_timer <= "111001";
-		end case;
+begin		
+	case game_status is
+		when "000" =>
+			time_on <= '0';
+		when "001" =>
+			if pix_y(9 downto 3) = 1 and pix_x(9 downto 3) > 66 and pix_x(9 downto 3) < 74 then
+				time_on <= '1';
+			else
+				time_on <= '0';
+			end if;
+			font_row_timer <= STD_LOGIC_VECTOR(pix_y(2 downto 0));
+			font_col_timer <= STD_LOGIC_VECTOR(pix_x(2 downto 0));
+			case pix_x(9 downto 3) is
+				when "1000011" =>
+					char_address_timer <= "010100";  -- T (24)	(when at index 67)
+				when "1000100" =>
+					char_address_timer <= "001001";	-- I (11)	(when at index 68)
+				when "1000101" =>
+					char_address_timer <= "001101";	-- M (15)	(when at index 69)	 
+				when "1000110" =>   	
+					char_address_timer <= "000101";	-- E (05)	(when at index 70)
+				when "1000111" =>  		
+					char_address_timer <= "100000";	--   (40)	(when at index 71)
+				when "1001000" =>
+				case timer1 is
+						when "0000" => char_address_timer <= "110000";
+						when "0001" => char_address_timer <= "110001";
+						when "0010" => char_address_timer <= "110010";
+						when "0011" => char_address_timer <= "110011";
+						when "0100" => char_address_timer <= "110100";
+						when "0101" => char_address_timer <= "110101";
+						when "0110" => char_address_timer <= "110110";
+						when "0111" => char_address_timer <= "110111";
+						when "1000" => char_address_timer <= "111000";
+						when others => char_address_timer <= "111001";
+				end case;
+				when "1001001" =>
+					case timer0 is
+						when "0000" => char_address_timer <= "110000";
+						when "0001" => char_address_timer <= "110001";
+						when "0010" => char_address_timer <= "110010";
+						when "0011" => char_address_timer <= "110011";
+						when "0100" => char_address_timer <= "110100";
+						when "0101" => char_address_timer <= "110101";
+						when "0110" => char_address_timer <= "110110";
+						when "0111" => char_address_timer <= "110111";
+						when "1000" => char_address_timer <= "111000";
+						when others => char_address_timer <= "111001";
+				end case;
+				when others =>
+					char_address_timer <= "100110";
+			end case;
+		when "010" =>
+			if pix_y(9 downto 3) = 1 and pix_x(9 downto 3) > 66 and pix_x(9 downto 3) < 74 then
+				time_on <= '1';
+			else
+				time_on <= '0';
+			end if;
+			font_row_timer <= STD_LOGIC_VECTOR(pix_y(2 downto 0));
+			font_col_timer <= STD_LOGIC_VECTOR(pix_x(2 downto 0));
+			case pix_x(9 downto 3) is
+				when "1000011" =>
+					char_address_timer <= "010100";  -- T (24)	(when at index 67)
+				when "1000100" =>
+					char_address_timer <= "001001";	-- I (11)	(when at index 68)
+				when "1000101" =>
+					char_address_timer <= "001101";	-- M (15)	(when at index 69)	 
+				when "1000110" =>   	
+					char_address_timer <= "000101";	-- E (05)	(when at index 70)
+				when "1000111" =>  		
+					char_address_timer <= "100000";	--   (40)	(when at index 71)
+				when "1001000" =>
+				case timer1 is
+						when "0000" => char_address_timer <= "110000";
+						when "0001" => char_address_timer <= "110001";
+						when "0010" => char_address_timer <= "110010";
+						when "0011" => char_address_timer <= "110011";
+						when "0100" => char_address_timer <= "110100";
+						when "0101" => char_address_timer <= "110101";
+						when "0110" => char_address_timer <= "110110";
+						when "0111" => char_address_timer <= "110111";
+						when "1000" => char_address_timer <= "111000";
+						when others => char_address_timer <= "111001";
+				end case;
+				when "1001001" =>
+					case timer0 is
+						when "0000" => char_address_timer <= "110000";
+						when "0001" => char_address_timer <= "110001";
+						when "0010" => char_address_timer <= "110010";
+						when "0011" => char_address_timer <= "110011";
+						when "0100" => char_address_timer <= "110100";
+						when "0101" => char_address_timer <= "110101";
+						when "0110" => char_address_timer <= "110110";
+						when "0111" => char_address_timer <= "110111";
+						when "1000" => char_address_timer <= "111000";
+						when others => char_address_timer <= "111001";
+				end case;
+				when others =>
+					char_address_timer <= "100110";
+			end case;
+		when "011" =>
+			if pix_y(9 downto 3) = 1 and pix_x(9 downto 3) > 66 and pix_x(9 downto 3) < 74 then
+				time_on <= '1';
+			else
+				time_on <= '0';
+			end if;
+			font_row_timer <= STD_LOGIC_VECTOR(pix_y(2 downto 0));
+			font_col_timer <= STD_LOGIC_VECTOR(pix_x(2 downto 0));
+			case pix_x(9 downto 3) is
+				when "1000011" =>
+					char_address_timer <= "010100";  -- T (24)	(when at index 67)
+				when "1000100" =>
+					char_address_timer <= "001001";	-- I (11)	(when at index 68)
+				when "1000101" =>
+					char_address_timer <= "001101";	-- M (15)	(when at index 69)	 
+				when "1000110" =>   	
+					char_address_timer <= "000101";	-- E (05)	(when at index 70)
+				when "1000111" =>  		
+					char_address_timer <= "100000";	--   (40)	(when at index 71)
+				when "1001000" =>
+				case timer1 is
+						when "0000" => char_address_timer <= "110000";
+						when "0001" => char_address_timer <= "110001";
+						when "0010" => char_address_timer <= "110010";
+						when "0011" => char_address_timer <= "110011";
+						when "0100" => char_address_timer <= "110100";
+						when "0101" => char_address_timer <= "110101";
+						when "0110" => char_address_timer <= "110110";
+						when "0111" => char_address_timer <= "110111";
+						when "1000" => char_address_timer <= "111000";
+						when others => char_address_timer <= "111001";
+				end case;
+				when "1001001" =>
+					case timer0 is
+						when "0000" => char_address_timer <= "110000";
+						when "0001" => char_address_timer <= "110001";
+						when "0010" => char_address_timer <= "110010";
+						when "0011" => char_address_timer <= "110011";
+						when "0100" => char_address_timer <= "110100";
+						when "0101" => char_address_timer <= "110101";
+						when "0110" => char_address_timer <= "110110";
+						when "0111" => char_address_timer <= "110111";
+						when "1000" => char_address_timer <= "111000";
+						when others => char_address_timer <= "111001";
+				end case;
+				when others =>
+					char_address_timer <= "100110";
+			end case;	
 		when others =>
-			char_address_timer <= "100110";
-	end case;	
+			time_on <= '0';
+	end case;
 end process;
-	
 	timer0 <= timer1_in;
 	timer1 <= timer10_in;
 	-------------------use bullet shape in mif file-----------
@@ -368,23 +611,51 @@ Enemy_Y_pos <= CONV_STD_LOGIC_VECTOR(25,10);
 
 RGB_Display_EnemyTank: Process (Enemy_X_pos, Enemy_Y_pos, pixel_y, pixel_x, Enemy_Size)
 BEGIN
+	case game_status is
+		when "000" =>
+			EnemyTank_On <= '0';
+		when "001" =>
 			-- Set EnemyTank_On ='1' to display ball
- IF ('0' & Enemy_X_pos <= '0' & pixel_x + Enemy_Size) AND
- 			-- compare positive numbers only
- 	('0' & Enemy_X_pos + Enemy_Size >= '0' & pixel_x) AND
- 	('0' & Enemy_Y_pos <= '0' & pixel_y + Enemy_Size) AND
- 	('0' & Enemy_Y_pos + Enemy_Size >= '0' & pixel_y ) THEN
- 		EnemyTank_On <= '1';
- 	ELSE
- 		EnemyTank_On <= '0';
-END IF;
+			IF ('0' & Enemy_X_pos <= '0' & pixel_x + Enemy_Size) AND
+						-- compare positive numbers only
+				('0' & Enemy_X_pos + Enemy_Size >= '0' & pixel_x) AND
+				('0' & Enemy_Y_pos <= '0' & pixel_y + Enemy_Size) AND
+				('0' & Enemy_Y_pos + Enemy_Size >= '0' & pixel_y ) THEN
+					EnemyTank_On <= '1';
+			ELSE
+					EnemyTank_On <= '0';
+			END IF;
+		when "010" =>
+			-- Set EnemyTank_On ='1' to display ball
+			IF ('0' & Enemy_X_pos <= '0' & pixel_x + Enemy_Size) AND
+						-- compare positive numbers only
+				('0' & Enemy_X_pos + Enemy_Size >= '0' & pixel_x) AND
+				('0' & Enemy_Y_pos <= '0' & pixel_y + Enemy_Size) AND
+				('0' & Enemy_Y_pos + Enemy_Size >= '0' & pixel_y ) THEN
+					EnemyTank_On <= '1';
+			ELSE
+					EnemyTank_On <= '0';
+			END IF;
+		when "011" =>
+			-- Set EnemyTank_On ='1' to display ball
+			IF ('0' & Enemy_X_pos <= '0' & pixel_x + Enemy_Size) AND
+						-- compare positive numbers only
+				('0' & Enemy_X_pos + Enemy_Size >= '0' & pixel_x) AND
+				('0' & Enemy_Y_pos <= '0' & pixel_y + Enemy_Size) AND
+				('0' & Enemy_Y_pos + Enemy_Size >= '0' & pixel_y ) THEN
+					EnemyTank_On <= '1';
+			ELSE
+					EnemyTank_On <= '0';
+			END IF;
+		when others =>
+			EnemyTank_On <= '0';
+	end case;
 END process RGB_Display_Enemytank;
 
 Move_Enemy: process
 BEGIN
 			-- Move enemy once every vertical sync
-	WAIT UNTIL vert_sync_int'event and vert_sync_int = '1';
-		
+	WAIT UNTIL vert_sync_int'event and vert_sync_int = '1';		
 		case enemy_fsm is
 			when "00" =>
 				-- Bounce off left or right of screen
@@ -418,113 +689,313 @@ Player_Y_pos <= CONV_STD_LOGIC_VECTOR(420,10);
 
 RGB_Display_PlayerTank: Process (Player_X_Pos, Player_Y_Pos, pixel_y, pixel_x, Player_Size)
 BEGIN
-			-- Set Tank_on ='1' to display red Tank
- IF ('0' & Player_X_Pos <= '0' & pixel_x + Player_Size) AND
- 			-- compare positive numbers only
- 	('0' & Player_X_Pos + Player_Size >= '0' & pixel_x) AND
- 	('0' & Player_Y_Pos <= '0' & pixel_y + Player_Size) AND
-	('0' & Player_Y_Pos + Player_Size >= '0' & pixel_y ) THEN
- 		PlayerTank_on <= '1';
-  ELSE
- 		PlayerTank_on <= '0';
-  END IF;
+	case game_status is
+		when "000" =>
+			PlayerTank_on <= '0';
+		when "001" =>
+			 -- Set Tank_on ='1' to display red Tank
+			 IF ('0' & Player_X_Pos <= '0' & pixel_x + Player_Size) AND
+						-- compare positive numbers only
+				('0' & Player_X_Pos + Player_Size >= '0' & pixel_x) AND
+				('0' & Player_Y_Pos <= '0' & pixel_y + Player_Size) AND
+				('0' & Player_Y_Pos + Player_Size >= '0' & pixel_y ) THEN
+					PlayerTank_on <= '1';
+			  ELSE
+					PlayerTank_on <= '0';
+			  END IF;
+		when "010" =>
+			 -- Set Tank_on ='1' to display red Tank
+			 IF ('0' & Player_X_Pos <= '0' & pixel_x + Player_Size) AND
+						-- compare positive numbers only
+				('0' & Player_X_Pos + Player_Size >= '0' & pixel_x) AND
+				('0' & Player_Y_Pos <= '0' & pixel_y + Player_Size) AND
+				('0' & Player_Y_Pos + Player_Size >= '0' & pixel_y ) THEN
+					PlayerTank_on <= '1';
+			  ELSE
+					PlayerTank_on <= '0';
+			  END IF;
+		when "011" =>
+			 -- Set Tank_on ='1' to display red Tank
+			 IF ('0' & Player_X_Pos <= '0' & pixel_x + Player_Size) AND
+						-- compare positive numbers only
+				('0' & Player_X_Pos + Player_Size >= '0' & pixel_x) AND
+				('0' & Player_Y_Pos <= '0' & pixel_y + Player_Size) AND
+				('0' & Player_Y_Pos + Player_Size >= '0' & pixel_y ) THEN
+					PlayerTank_on <= '1';
+			  ELSE
+					PlayerTank_on <= '0';
+			  END IF;
+		when others =>
+			PlayerTank_on <= '0';
+	end case;
 END process RGB_Display_PlayerTank;
-
 
 Move_Tank: process(Player_X_motion,vert_sync_int)
 BEGIN
-         -- Move Tank depends horizontally depends onmouse
-			if(vert_sync_int'event and vert_sync_int = '1') then
-			   if(sw3 = '1') then
-				  Player_X_Pos <= CONV_STD_LOGIC_VECTOR(320,10);
-			   else
-			     Player_X_motion <= Mouse_X_motion;
-			     -- Compute next tank x position
-		        Player_X_pos <= Player_X_motion;
-				end if;
+if(vert_sync_int'event and vert_sync_int = '1') then
+	case game_status is
+		when "000" =>
+			null;
+		when "001" =>
+		-- Move Tank depends horizontally depends onmouse			
+			if(mode_latch /= "001") then
+			  Player_X_Pos <= CONV_STD_LOGIC_VECTOR(320,10);
+			else
+			  Player_X_motion <= Mouse_X_motion;
+			  -- Compute next tank x position
+			  Player_X_pos <= Player_X_motion;
 			end if;
-			
+		when "010" =>
+		-- Move Tank depends horizontally depends onmouse
+			if(mode_latch /= "010") then
+			  Player_X_Pos <= CONV_STD_LOGIC_VECTOR(320,10);
+			else
+			  Player_X_motion <= Mouse_X_motion;
+			  -- Compute next tank x position
+			  Player_X_pos <= Player_X_motion;
+			end if;
+		when "011" =>
+		-- Move Tank depends horizontally depends onmouse
+			if(mode_latch /= "011") then
+			  Player_X_Pos <= CONV_STD_LOGIC_VECTOR(320,10);
+			else
+			  Player_X_motion <= Mouse_X_motion;
+			  -- Compute next tank x position
+			  Player_X_pos <= Player_X_motion;
+			end if;
+		when others =>
+			null;
+	end case;
+end if;
 END process Move_Tank;
 
 bullet_motion <= CONV_STD_LOGIC_VECTOR(10,10);
 bullet_size	  <= CONV_STD_LOGIC_VECTOR(4, 10);
+
 Tank_Shoot: process(vert_sync_int, bullet_motion, mouse_left_click, sw3)
-BEGIN		
-			if(vert_sync_int'event and vert_sync_int = '1') then
-				if (sw3 = '1') then
-					gameScore1 <= "0000";
-					gameScore10 <= "0000";
-					gameScore100 <= "0000";
-					bullet_fired <= '0';
-				else 
-					enemy_fsm <= "00";
-					if(bullet_fired = '0' and mouse_left_click = '1') then
-							bullet_fired <= '1';
-							bullet_Y_Pos <= CONV_STD_LOGIC_VECTOR(410, 10); --hard coded to be just above player tank
-							bullet_X_Pos <= player_X_Pos;
-					end if;
-					--check if bullet hits enemy
-					if (bullet_fired = '1') then
-						IF ('0' & Enemy_X_Pos <= '0' & bullet_X_pos + Enemy_Size) AND
-							('0' & Enemy_X_Pos + Enemy_Size >= '0' & bullet_X_pos) AND
-							('0' & Enemy_Y_Pos <= '0' & bullet_Y_pos + Enemy_Size) AND
-							('0' & Enemy_Y_Pos + Enemy_Size >= '0' & bullet_Y_Pos) THEN
-							-------------------gamescore counter------------------------------------
-							if gameScore1 = "1001" then
-								Enemy_X_motion_incrementer <= Enemy_X_motion_incrementer + 1;
-								if gameScore10 = "1001" then
-									if gameScore100 = "1001" then
-										gameScore100 <= "0000";
-									else
-										gameScore100 <= gameScore100 + 1;
-									end if;
-									gameScore10 <= "0000";
+BEGIN
+if(vert_sync_int'event and vert_sync_int = '1') then
+	case game_status is
+		when "000" =>
+			null;
+		when "001" =>
+			if (mode_latch /= "001") then
+				gameScore1 <= "0000";
+				gameScore10 <= "0000";
+				gameScore100 <= "0000";
+				bullet_fired <= '0';
+			else 
+				enemy_fsm <= "00";
+				if(bullet_fired = '0' and mouse_left_click = '1') then
+						bullet_fired <= '1';
+						bullet_Y_Pos <= CONV_STD_LOGIC_VECTOR(410, 10); --hard coded to be just above player tank
+						bullet_X_Pos <= player_X_Pos;
+				end if;
+				--check if bullet hits enemy
+				if (bullet_fired = '1') then
+					IF ('0' & Enemy_X_Pos <= '0' & bullet_X_pos + Enemy_Size) AND
+						('0' & Enemy_X_Pos + Enemy_Size >= '0' & bullet_X_pos) AND
+						('0' & Enemy_Y_Pos <= '0' & bullet_Y_pos + Enemy_Size) AND
+						('0' & Enemy_Y_Pos + Enemy_Size >= '0' & bullet_Y_Pos) THEN
+						-------------------gamescore counter------------------------------------
+						if gameScore1 = "1001" then
+							Enemy_X_motion_incrementer <= Enemy_X_motion_incrementer + 1;
+							if gameScore10 = "1001" then
+								if gameScore100 = "1001" then
+									gameScore100 <= "0000";
 								else
-									gameScore10 <= gameScore10 + 1;
+									gameScore100 <= gameScore100 + 1;
 								end if;
-								gameScore1 <= "0000";
+								gameScore10 <= "0000";
 							else
-								gamescore1 <= gameScore1 + 1;
+								gameScore10 <= gameScore10 + 1;
 							end if;
-							enemy_fsm <= "01";
-						----------------------------allow bullets to fire again----------------------
-							bullet_fired <= '0';
-						-------------------check if bullet misses enemy------------------------------
-						ELSIF ('0' & bullet_Y_pos) <= '0' & bullet_Size THEN
-							bullet_fired <= '0';
-						ELSE
-							-- Compute next bullet Y position
-							bullet_Y_pos <= bullet_Y_Pos - bullet_motion;
-							enemy_fsm <= "00";
+							gameScore1 <= "0000";
+						else
+							gamescore1 <= gameScore1 + 1;
 						end if;
+						enemy_fsm <= "01";
+					----------------------------allow bullets to fire again----------------------
+						bullet_fired <= '0';
+					-------------------check if bullet misses enemy------------------------------
+					ELSIF ('0' & bullet_Y_pos) <= '0' & bullet_Size THEN
+						bullet_fired <= '0';
+					ELSE
+						-- Compute next bullet Y position
+						bullet_Y_pos <= bullet_Y_Pos - bullet_motion;
+						enemy_fsm <= "00";
 					end if;
 				end if;
 			end if;
-
+		when "010" =>
+			if (mode_latch /= "010") then
+				gameScore1 <= "0000";
+				gameScore10 <= "0000";
+				gameScore100 <= "0000";
+				bullet_fired <= '0';
+			else 
+				enemy_fsm <= "00";
+				if(bullet_fired = '0' and mouse_left_click = '1') then
+						bullet_fired <= '1';
+						bullet_Y_Pos <= CONV_STD_LOGIC_VECTOR(410, 10); --hard coded to be just above player tank
+						bullet_X_Pos <= player_X_Pos;
+				end if;
+				--check if bullet hits enemy
+				if (bullet_fired = '1') then
+					IF ('0' & Enemy_X_Pos <= '0' & bullet_X_pos + Enemy_Size) AND
+						('0' & Enemy_X_Pos + Enemy_Size >= '0' & bullet_X_pos) AND
+						('0' & Enemy_Y_Pos <= '0' & bullet_Y_pos + Enemy_Size) AND
+						('0' & Enemy_Y_Pos + Enemy_Size >= '0' & bullet_Y_Pos) THEN
+						-------------------gamescore counter------------------------------------
+						if gameScore1 = "1001" then
+							Enemy_X_motion_incrementer <= Enemy_X_motion_incrementer + 1;
+							if gameScore10 = "1001" then
+								if gameScore100 = "1001" then
+									gameScore100 <= "0000";
+								else
+									gameScore100 <= gameScore100 + 1;
+								end if;
+								gameScore10 <= "0000";
+							else
+								gameScore10 <= gameScore10 + 1;
+							end if;
+							gameScore1 <= "0000";
+						else
+							gamescore1 <= gameScore1 + 1;
+						end if;
+						enemy_fsm <= "01";
+					----------------------------allow bullets to fire again----------------------
+						bullet_fired <= '0';
+					-------------------check if bullet misses enemy------------------------------
+					ELSIF ('0' & bullet_Y_pos) <= '0' & bullet_Size THEN
+						bullet_fired <= '0';
+					ELSE
+						-- Compute next bullet Y position
+						bullet_Y_pos <= bullet_Y_Pos - bullet_motion;
+						enemy_fsm <= "00";
+					end if;
+				end if;
+			end if;
+		when "011" =>
+			if (mode_latch /= "011") then
+				gameScore1 <= "0000";
+				gameScore10 <= "0000";
+				gameScore100 <= "0000";
+				bullet_fired <= '0';
+			else 
+				enemy_fsm <= "00";
+				if(bullet_fired = '0' and mouse_left_click = '1') then
+						bullet_fired <= '1';
+						bullet_Y_Pos <= CONV_STD_LOGIC_VECTOR(410, 10); --hard coded to be just above player tank
+						bullet_X_Pos <= player_X_Pos;
+				end if;
+				--check if bullet hits enemy
+				if (bullet_fired = '1') then
+					IF ('0' & Enemy_X_Pos <= '0' & bullet_X_pos + Enemy_Size) AND
+						('0' & Enemy_X_Pos + Enemy_Size >= '0' & bullet_X_pos) AND
+						('0' & Enemy_Y_Pos <= '0' & bullet_Y_pos + Enemy_Size) AND
+						('0' & Enemy_Y_Pos + Enemy_Size >= '0' & bullet_Y_Pos) THEN
+						-------------------gamescore counter------------------------------------
+						if gameScore1 = "1001" then
+							Enemy_X_motion_incrementer <= Enemy_X_motion_incrementer + 1;
+							if gameScore10 = "1001" then
+								if gameScore100 = "1001" then
+									gameScore100 <= "0000";
+								else
+									gameScore100 <= gameScore100 + 1;
+								end if;
+								gameScore10 <= "0000";
+							else
+								gameScore10 <= gameScore10 + 1;
+							end if;
+							gameScore1 <= "0000";
+						else
+							gamescore1 <= gameScore1 + 1;
+						end if;
+						enemy_fsm <= "01";
+					----------------------------allow bullets to fire again----------------------
+						bullet_fired <= '0';
+					-------------------check if bullet misses enemy------------------------------
+					ELSIF ('0' & bullet_Y_pos) <= '0' & bullet_Size THEN
+						bullet_fired <= '0';
+					ELSE
+						-- Compute next bullet Y position
+						bullet_Y_pos <= bullet_Y_Pos - bullet_motion;
+						enemy_fsm <= "00";
+					end if;
+				end if;
+			end if;
+		when others =>
+			null;
+	end case;
+end if;	
 END process Tank_Shoot;
-
 gamescore100_out <= gameScore100;
 gamescore10_out <= gameScore10;
 gamescore1_out <= gameScore1;
+
 RGB_Display_Bullet: process(bullet_X_Pos, bullet_Y_Pos, pixel_x, pixel_y)
 BEGIN
-	if (sw3 = '1') then
-		bullet_on <= '0';
-	else
-		if(bullet_fired = '1') then
-			IF ('0' & bullet_X_Pos <= '0' & pixel_x + bullet_Size) AND
-					-- compare positive numbers only
-   			('0' & bullet_X_Pos + bullet_Size >= '0' & pixel_x) AND
-				('0' & bullet_Y_Pos <= '0' & pixel_y + bullet_Size) AND
-				('0' & bullet_Y_Pos + bullet_Size >= '0' & pixel_y ) THEN
-				bullet_on <= '1';
-			ELSE
+	case game_status is
+		when "000" =>
+			null;
+		when "001" =>		
+			if (mode_latch /= "001") then
 				bullet_on <= '0';
-			END IF;
-		ELSE	
-			bullet_on <= '0';
-		END IF;
-	end if;
+			else
+				if(bullet_fired = '1') then
+					IF ('0' & bullet_X_Pos <= '0' & pixel_x + bullet_Size) AND
+							-- compare positive numbers only
+						('0' & bullet_X_Pos + bullet_Size >= '0' & pixel_x) AND
+						('0' & bullet_Y_Pos <= '0' & pixel_y + bullet_Size) AND
+						('0' & bullet_Y_Pos + bullet_Size >= '0' & pixel_y ) THEN
+						bullet_on <= '1';
+					ELSE
+						bullet_on <= '0';
+					END IF;
+				ELSE	
+					bullet_on <= '0';
+				END IF;
+			end if;
+		when "010" =>
+			if (mode_latch /= "010") then
+				bullet_on <= '0';
+			else
+				if(bullet_fired = '1') then
+					IF ('0' & bullet_X_Pos <= '0' & pixel_x + bullet_Size) AND
+							-- compare positive numbers only
+						('0' & bullet_X_Pos + bullet_Size >= '0' & pixel_x) AND
+						('0' & bullet_Y_Pos <= '0' & pixel_y + bullet_Size) AND
+						('0' & bullet_Y_Pos + bullet_Size >= '0' & pixel_y ) THEN
+						bullet_on <= '1';
+					ELSE
+						bullet_on <= '0';
+					END IF;
+				ELSE	
+					bullet_on <= '0';
+				END IF;
+			end if;
+		when "011" =>
+			if (mode_latch /= "011") then
+				bullet_on <= '0';
+			else
+				if(bullet_fired = '1') then
+					IF ('0' & bullet_X_Pos <= '0' & pixel_x + bullet_Size) AND
+							-- compare positive numbers only
+						('0' & bullet_X_Pos + bullet_Size >= '0' & pixel_x) AND
+						('0' & bullet_Y_Pos <= '0' & pixel_y + bullet_Size) AND
+						('0' & bullet_Y_Pos + bullet_Size >= '0' & pixel_y ) THEN
+						bullet_on <= '1';
+					ELSE
+						bullet_on <= '0';
+					END IF;
+				ELSE	
+					bullet_on <= '0';
+				END IF;
+			end if;
+		when others =>
+			null;
+	end case;
 END process RGB_Display_Bullet;
 
 RNG_Enemy_Position: process (clock)
@@ -542,4 +1013,16 @@ RNG_Enemy_Position: process (clock)
 				end if;
 			end if;
 end process RNG_Enemy_Position;
+
+Memory_latch: process (game_status)
+	BEGIN
+		if (clock'event and clock = '1') then
+			timer10_latch <= timer1;
+			timer1_latch <= timer0;
+			score100_latch <= gamescore100;
+			score10_latch <= gamescore10;
+			score1_latch <= gamescore1;
+			mode_latch <= game_status;
+		end if;
+	end process;
 END SYN;

@@ -27,16 +27,15 @@ Entity FSM is
 			gamescore1:   in std_logic_vector (3 downto 0);
 			Enable:        out std_logic;
 			-- 0 is training mode, 9 is game failed, 10 is idle start screen
-			Mode:          out std_logic_vector (2 downto 0)
+			Mode:          out std_logic_vector (2 downto 0) := "000"
 );
   
 End FSM;
-
-Architecture behav of FSM is
-
+architecture behaviour of FSM is
 Type state_type is (idle,level0,level1,level2,wingame,gamefailed);
 Signal y: state_type;
- 
+Signal click_latch_left, click_latch_right: std_logic;
+Signal click_out_left, click_out_right:		std_logic;
 begin
   process(clk,reset)
   begin
@@ -77,18 +76,28 @@ begin
 			 end if;
 		  when gamefailed =>
 		    mode <= "100";
-			 if (right_click = '1' or left_click = '1') then
+			 if (click_out_right = '1' or click_out_left = '1') then
 			   y <= idle;
 			 end if;
 		  when wingame =>
 		      mode <= "101";
-				if (right_click = '1' or left_click = '1') then
+				if (click_out_right = '1' or click_out_left = '1') then
 		        y <= idle;
 				end if;
 		  end case;
 	 end if;
   end process;
-end behav; 
+  
+  process(clk)
+    begin
+         if clk= '1' and clk'event then
+               click_latch_left<=left_click;
+					click_latch_right<=right_click;
+         end if;			
+    end process;
+click_out_left <= (not click_latch_left) and left_click; 
+click_out_right <= (not click_latch_right) and right_click;
+end behaviour; 
 
 
 		

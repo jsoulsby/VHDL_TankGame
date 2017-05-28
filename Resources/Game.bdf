@@ -1393,19 +1393,9 @@ applicable agreement for further details.
 	(pt 184 288)
 )
 (connector
-	(text "PB1" (rect 178 408 198 420)(font "Arial" ))
-	(pt 200 416)
-	(pt 232 416)
-)
-(connector
 	(text "mouse_left" (rect 170 320 225 332)(font "Arial" ))
 	(pt 232 336)
 	(pt 160 336)
-)
-(connector
-	(text "PB0" (rect 178 424 198 436)(font "Arial" ))
-	(pt 200 432)
-	(pt 232 432)
 )
 (connector
 	(pt 520 288)
@@ -1489,4 +1479,14 @@ applicable agreement for further details.
 	(text "PB2" (rect -70 184 -50 196)(font "Arial" ))
 	(pt -40 200)
 	(pt -72 200)
+)
+(connector
+	(text "PB1" (rect 178 424 198 436)(font "Arial" ))
+	(pt 200 432)
+	(pt 232 432)
+)
+(connector
+	(text "PB0" (rect 178 408 198 420)(font "Arial" ))
+	(pt 200 416)
+	(pt 232 416)
 )
