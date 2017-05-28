@@ -78,6 +78,7 @@ ARCHITECTURE SYN OF vga_controller IS
 	SIGNAL bullet_Size														: STD_LOGIC_VECTOR(9 DOWNTO 0);
 	SIGNAL font_col_bullet, font_row_bullet							: STD_LOGIC_VECTOR(2 DOWNTO 0);
 	SIGNAL char_address_bullet												: STD_LOGIC_VECTOR(5 DOWNTO 0);
+	SIGNAL bulx, buly															: STD_LOGIC_VECTOR(9 DOWNTO 0);
 	
 	--------------------------------------------------------------------------------------------------
 	COMPONENT altsyncram
@@ -114,7 +115,7 @@ BEGIN
 		address_aclr_a => "NONE",
 		clock_enable_input_a => "BYPASS",
 		clock_enable_output_a => "BYPASS",
-		init_file => "tcgrom2.mif",
+		init_file => "tcgrom.mif",
 		intended_device_family => "Cyclone III",
 		lpm_hint => "ENABLE_RUNTIME_MOD=NO",
 		lpm_type => "altsyncram",
@@ -134,7 +135,7 @@ BEGIN
 
 Screen_Display:process(pix_x, pix_y) 
 begin
-    if pix_y(9 downto 3) >= 22 and pix_y(9 downto 3) <= 25 and pix_x(9 downto 3) >= 16 and pix_x(9 downto 3) <= 63 then
+    if pix_y(9 downto 3) >= 16 and pix_y(9 downto 3) <= 19 and pix_x(9 downto 3) >= 16 and pix_x(9 downto 3) <= 63 then
 	    screen_on <= '1';
 	 else 
 	    screen_on <= '0';
@@ -398,6 +399,8 @@ BEGIN
 				Enemy_X_Pos <= CONV_STD_LOGIC_VECTOR(counter, 10);
 					if (rng_direction = '1') then
 						Enemy_X_motion <= CONV_STD_LOGIC_VECTOR(Enemy_X_motion_incrementer,10);
+					else
+						Enemy_X_motion <= CONV_STD_LOGIC_VECTOR(-Enemy_X_motion_incrementer,10);
 					end if;
 		end case;
 			
@@ -440,7 +443,7 @@ BEGIN
 END process Move_Tank;
 
 bullet_motion <= CONV_STD_LOGIC_VECTOR(10,10);
-bullet_size	  <= CONV_STD_LOGIC_VECTOR(2, 10);
+bullet_size	  <= CONV_STD_LOGIC_VECTOR(4, 10);
 Tank_Shoot: process(vert_sync_int, bullet_motion, mouse_left_click, sw0)
 BEGIN		
 			if(vert_sync_int'event and vert_sync_int = '1') then
@@ -504,7 +507,7 @@ BEGIN
 		if(bullet_fired = '1') then
 			IF ('0' & bullet_X_Pos <= '0' & pixel_x + bullet_Size) AND
 					-- compare positive numbers only
-				('0' & bullet_X_Pos + bullet_Size >= '0' & pixel_x) AND
+   			('0' & bullet_X_Pos + bullet_Size >= '0' & pixel_x) AND
 				('0' & bullet_Y_Pos <= '0' & pixel_y + bullet_Size) AND
 				('0' & bullet_Y_Pos + bullet_Size >= '0' & pixel_y ) THEN
 				bullet_on <= '1';
