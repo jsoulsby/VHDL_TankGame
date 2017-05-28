@@ -54,14 +54,17 @@ ARCHITECTURE SYN OF vga_controller IS
 	SIGNAL Enemy_Y_pos, Enemy_X_pos										: STD_LOGIC_VECTOR(9 DOWNTO 0);
 	SIGNAL EnemyTank_On														: STD_LOGIC;
 	
-	
-	
 	------------------------------- Player Tank Display Signals -----------------------------------
 	SIGNAL Player_Size														: STD_LOGIC_VECTOR(9 DOWNTO 0);
 	SIGNAL Player_X_motion													: STD_LOGIC_VECTOR(9 DOWNTO 0);	
 	SIGNAL Player_X_Pos														: STD_LOGIC_VECTOR(9 DOWNTO 0);	
 	SIGNAL Player_Y_Pos														: STD_LOGIC_VECTOR(9 DOWNTO 0);	
 	SIGNAL PlayerTank_On														: STD_LOGIC;
+	
+	-------------------------------- Start screen display
+	SIGNAL font_col_screen, font_row_screen                     : STD_LOGIC_VECTOR(2 DOWNTO 0);
+	SIGNAL screen_on                                            : STD_LOGIC;
+	SIGNAL char_address_screen                                  : STD_LOGIC_VECTOR(5 DOWNTO 0);
 	
 	------------------------------- Bullet Signals --------------------------------------------------
 	SIGNAL bullet_fired														: STD_LOGIC;
@@ -125,6 +128,42 @@ BEGIN
 		address_a => rom_address,
 		q_a => rom_data
 	);
+
+Screen_Display:process(pix_x, pix_y) 
+begin
+    if pix_y(9 downto 3) >= 28 and pix_y(9 downto 3) <= 31 and pix_x(9 downto 3) >= 16 and pix_x(9 downto 3) <= 63 then
+	    screen_on <= '1';
+	 else 
+	    screen_on <= '0';
+	 end if;
+	 font_row_screen <= STD_LOGIC_VECTOR(pix_y(4 downto 2));
+	 font_col_screen <= STD_LOGIC_VECTOR(pix_x(4 downto 2));
+	 if pix_x(9 downto 3) >= 16 and pix_x(9 downto 3) <= 19 then
+	    char_address_screen <= "010100";  -- T 
+    elsif pix_x(9 downto 3) >= 20 and pix_x(9 downto 3) <= 23 then
+		  char_address_screen <= "000001"; -- A 
+    elsif pix_x(9 downto 3) >= 24 and pix_x(9 downto 3) <= 27 then
+        char_address_screen <= "001110"; -- N 
+	 elsif pix_x(9 downto 3) >= 28 and pix_x(9 downto 3) <= 31 then
+	     char_address_screen <= "001011"; -- K 
+	 elsif pix_x(9 downto 3) >= 32 and pix_x(9 downto 3) <= 35 then
+	     char_address_screen <= "100000"; -- space
+	 elsif pix_x(9 downto 3) >= 36 and pix_x(9 downto 3) <= 39 then
+	     char_address_screen <= "001000"; --H (8)
+	 elsif pix_x(9 downto 3) >= 40 and pix_x(9 downto 3) <= 43 then
+	     char_address_screen <= "010101"; --U (21)
+	 elsif pix_x(9 downto 3) >= 44 and pix_x(9 downto 3) <= 47 then
+	     char_address_screen <= "001110"; --N 
+	 elsif pix_x(9 downto 3) >= 48 and pix_x(9 downto 3) <= 51 then
+	     char_address_screen <= "010100"; --T
+	 elsif pix_x(9 downto 3) >= 52 and pix_x(9 downto 3) <= 55 then
+	     char_address_screen <= "001001"; --I
+	 elsif pix_x(9 downto 3) >= 56 and pix_x(9 downto 3) <= 59 then
+	     char_address_screen <= "001110"; -- N
+	 elsif pix_x(9 downto 3) >= 60 and pix_x(9 downto 3) <= 63 then
+	     char_address_screen <= "000111"; -- G
+	 end if;
+end process;
 
 Score_Display: Process(pix_x, pix_y)
 begin
@@ -254,11 +293,23 @@ end process;
 	green <= '1';
 	blue <= '1';	
 	
+	if screen_On = '1' then
+	   char_address <= char_address_screen;
+		font_row <= font_row_screen;
+		font_col <= font_col_screen;
+		if rom_mux_output = '1' then
+		   red <= '1';
+		   blue <= '0';
+		   green <= '0';
+		end if;
+	end if;
+	
 	if PlayerTank_On = '1' then
 		red  <= '1';
 		green <= '0';
 		blue <= '0';
 	end if;
+	
 	if bullet_on = '1' then
 		char_address <= char_address_bullet;
 		font_row <= font_row_bullet;
@@ -269,11 +320,13 @@ end process;
 			blue <= '0';
 		end if;
 	end if;
+	
 	if EnemyTank_On = '1' then
 		red <= '0';
 		green <= '0';
 		blue <= '1';
 	end if;
+	
 	if score_on = '1' then
 		char_address <= char_address_score;
 		font_row <= font_row_score;
