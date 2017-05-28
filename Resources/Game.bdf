@@ -715,7 +715,7 @@ applicable agreement for further details.
 (symbol
 	(rect 288 256 504 496)
 	(text "vga_controller" (rect 5 0 74 12)(font "Arial" ))
-	(text "inst14" (rect 8 224 37 236)(font "Arial" ))
+	(text "inst7" (rect 8 224 31 236)(font "Arial" ))
 	(port
 		(pt 0 32)
 		(input)
@@ -789,16 +789,16 @@ applicable agreement for further details.
 	(port
 		(pt 0 192)
 		(input)
-		(text "timer10_in" (rect 0 0 50 12)(font "Arial" ))
-		(text "timer10_in" (rect 21 187 71 199)(font "Arial" ))
-		(line (pt 0 192)(pt 16 192))
+		(text "timer10_in[3..0]" (rect 0 0 76 12)(font "Arial" ))
+		(text "timer10_in[3..0]" (rect 21 187 97 199)(font "Arial" ))
+		(line (pt 0 192)(pt 16 192)(line_width 3))
 	)
 	(port
 		(pt 0 208)
 		(input)
-		(text "timer1_in" (rect 0 0 44 12)(font "Arial" ))
-		(text "timer1_in" (rect 21 203 65 215)(font "Arial" ))
-		(line (pt 0 208)(pt 16 208))
+		(text "timer1_in[3..0]" (rect 0 0 70 12)(font "Arial" ))
+		(text "timer1_in[3..0]" (rect 21 203 91 215)(font "Arial" ))
+		(line (pt 0 208)(pt 16 208)(line_width 3))
 	)
 	(port
 		(pt 216 32)
@@ -828,7 +828,7 @@ applicable agreement for further details.
 (symbol
 	(rect 456 32 640 112)
 	(text "Timer_Controller" (rect 5 0 85 12)(font "Arial" ))
-	(text "inst15" (rect 8 64 37 76)(font "Arial" ))
+	(text "inst8" (rect 8 64 31 76)(font "Arial" ))
 	(port
 		(pt 0 32)
 		(input)
@@ -1108,31 +1108,31 @@ applicable agreement for further details.
 	(pt 672 272)
 )
 (connector
-	(text "timer1" (rect 202 456 232 468)(font "Arial" ))
-	(pt 240 464)
-	(pt 288 464)
-	(bus)
+	(text "clk_25Mhz" (rect 410 48 460 60)(font "Arial" ))
+	(pt 400 64)
+	(pt 456 64)
 )
 (connector
-	(text "timer10" (rect 202 440 238 452)(font "Arial" ))
-	(pt 240 448)
-	(pt 288 448)
-	(bus)
-)
-(connector
-	(text "timer1" (rect 706 56 736 68)(font "Arial" ))
+	(text "timer1[3..0]" (rect 706 56 762 68)(font "Arial" ))
 	(pt 640 64)
 	(pt 688 64)
 	(bus)
 )
 (connector
-	(text "timer10" (rect 706 72 742 84)(font "Arial" ))
+	(text "timer10[3..0]" (rect 706 72 768 84)(font "Arial" ))
 	(pt 640 80)
 	(pt 688 80)
 	(bus)
 )
 (connector
-	(text "clk_25Mhz" (rect 410 48 460 60)(font "Arial" ))
-	(pt 400 64)
-	(pt 456 64)
+	(text "timer10[3..0]" (rect 178 440 240 452)(font "Arial" ))
+	(pt 240 448)
+	(pt 288 448)
+	(bus)
+)
+(connector
+	(text "timer1[3..0]" (rect 178 456 234 468)(font "Arial" ))
+	(pt 240 464)
+	(pt 288 464)
+	(bus)
 )

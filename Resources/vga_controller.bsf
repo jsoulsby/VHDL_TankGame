@@ -96,16 +96,16 @@ applicable agreement for further details.
 	(port
 		(pt 0 192)
 		(input)
-		(text "timer10_in" (rect 0 0 40 12)(font "Arial" ))
-		(text "timer10_in" (rect 21 187 61 199)(font "Arial" ))
-		(line (pt 0 192)(pt 16 192)(line_width 1))
+		(text "timer10_in[3..0]" (rect 0 0 60 12)(font "Arial" ))
+		(text "timer10_in[3..0]" (rect 21 187 81 199)(font "Arial" ))
+		(line (pt 0 192)(pt 16 192)(line_width 3))
 	)
 	(port
 		(pt 0 208)
 		(input)
-		(text "timer1_in" (rect 0 0 35 12)(font "Arial" ))
-		(text "timer1_in" (rect 21 203 56 215)(font "Arial" ))
-		(line (pt 0 208)(pt 16 208)(line_width 1))
+		(text "timer1_in[3..0]" (rect 0 0 55 12)(font "Arial" ))
+		(text "timer1_in[3..0]" (rect 21 203 76 215)(font "Arial" ))
+		(line (pt 0 208)(pt 16 208)(line_width 3))
 	)
 	(port
 		(pt 216 32)

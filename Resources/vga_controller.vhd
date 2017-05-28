@@ -18,7 +18,7 @@ ENTITY vga_controller IS
 		vert_sync_int						:	IN STD_LOGIC;
 		clock									: 	IN STD_LOGIC;
 		PB1, PB2								: 	IN STD_LOGIC;
-		timer10_in, timer1_in			:  IN STD_LOGIC;
+		timer10_in, timer1_in			:  IN STD_LOGIC_VECTOR (3 DOWNTO 0);
 		red,green,blue						:	OUT STD_LOGIC
 	);
 END vga_controller;
@@ -240,7 +240,9 @@ begin
 			char_address_timer <= "100110";
 	end case;	
 end process;
-
+	
+	timer1 <= timer1_in;
+	timer0 <= timer10_in;
 	-------------------use bullet shape in mif file-----------
 	char_address_bullet <= "111111"; -- swapped out 'F' for bullet shape in mif file (77)
 	font_row_bullet <= STD_LOGIC_VECTOR(pix_y(2 downto 0));
