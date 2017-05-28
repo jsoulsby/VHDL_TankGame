@@ -11,8 +11,9 @@ Entity FSM is
          --pb1
          Reset:         in std_logic;
 			--pb2
-		   Quit:         in std_logic;
-			leveltime:     in integer;
+		   Quit:          in std_logic;
+			leveltime1:    in std_logic_vector(3 DOWNTO 0);
+			leveltime10:   in std_logic_vector(3 DOWNTO 0);
 			right_click:   in std_logic;
          left_click:    in std_logic;
 			-- slide switch 
@@ -21,10 +22,12 @@ Entity FSM is
 		   SW1:           in std_logic;
 			--sw1
 			SW2:           in std_logic;
-			Score:         in std_logic_vector (3 downto 0);
+			gamescore100:  in std_logic_vector (3 downto 0);
+			gamescore10:   in std_logic_vector (3 downto 0);
+			gamescore1:   in std_logic_vector (3 downto 0);
 			Enable:        out std_logic;
-			-- 0 is traning mode, 9 is game failed, 10 is idle start screen
-			Mode:          out integer
+			-- 0 is training mode, 9 is game failed, 10 is idle start screen
+			Mode:          out std_logic_vector (2 downto 0)
 );
   
 End FSM;
@@ -50,33 +53,35 @@ begin
 	 elsif (rising_edge(clk)) then
 	   case y is 
 	     when idle =>
-	       Mode <= 10;
+	       Mode <= "000";
 		    if (left_click = '1') then
 		      y <= level1;
 		    elsif (right_click = '1') then
 			   y <= level0;
 			 end if;
 	     when level0 =>
-		    Mode <= 0;
+		    Mode <= "001";
 		  when level1 =>
-		    mode <= 1;
-		    if (score > 10) then
+		    mode <= "010";
+		    if (gamescore10 >= 1) then
 			   y <= level2;
-			 elsif (score <= 10 and leveltime = 0) then
+			 elsif (leveltime10 = "0000" and leveltime1 = "0000") then
 			   y <= gamefailed;
 			 end if;
 		  when level2 =>
-		    mode <= 2;
-			 if (score > 50) then
-			   y <= idle; 
+			mode <= "011";
+			 if (gamescore10 >= 1 and gamescore1 >= 5) then
+			   y <= wingame; 
+			elsif (leveltime10 = "0000" and leveltime1 = "0000") then
+				y <= gamefailed;
 			 end if;
 		  when gamefailed =>
-		    mode <= 9;
+		    mode <= "100";
 			 if (right_click = '1' or left_click = '1') then
 			   y <= idle;
 			 end if;
 		  when wingame =>
-		      mode <= 10;
+		      mode <= "101";
 				if (right_click = '1' or left_click = '1') then
 		        y <= idle;
 				end if;

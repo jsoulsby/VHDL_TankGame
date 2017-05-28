@@ -10,16 +10,20 @@ ENTITY vga_controller IS
 	PORT
 	(
 		--address							: 	IN STD_LOGIC_VECTOR (8 DOWNTO 0)
-		sw0									:  IN STD_LOGIC;
+		sw3									:  IN STD_LOGIC;
 		Mouse_X_Motion, Mouse_Y_Motion:	IN	STD_LOGIC_VECTOR (9 DOWNTO 0);
 		mouse_left_click					:	IN STD_LOGIC;
 		pixel_x								:	IN STD_LOGIC_VECTOR (9 DOWNTO 0);		
 		pixel_y								:	IN STD_LOGIC_VECTOR (9 DOWNTO 0);
 		vert_sync_int						:	IN STD_LOGIC;
 		clock									: 	IN STD_LOGIC;
-		PB1, PB2								: 	IN STD_LOGIC;
+		PB0, PB1								: 	IN STD_LOGIC;
 		timer10_in, timer1_in			:  IN STD_LOGIC_VECTOR (3 DOWNTO 0);
-		red,green,blue						:	OUT STD_LOGIC
+		game_status							:  IN STD_LOGIC_VECTOR (2 DOWNTO 0);
+		red,green,blue						:	OUT STD_LOGIC;
+		gameScore100_out					:	OUT STD_LOGIC_VECTOR(3 DOWNTO 0);
+		gameScore10_out					:	OUT STD_LOGIC_VECTOR(3 DOWNTO 0);
+		gameScore1_out						:	OUT STD_LOGIC_VECTOR(3 DOWNTO 0)
 	);
 END vga_controller;
 
@@ -390,7 +394,7 @@ BEGIN
 					Enemy_X_motion <= CONV_STD_LOGIC_VECTOR(Enemy_X_motion_incrementer,10);
 				END IF;
 				-- Compute next enemy Y position
-				IF(PB1 = '0' OR PB2 = '0') then
+				IF(PB1 = '0') then
 					Enemy_X_pos <= Enemy_X_pos + Enemy_X_motion + Enemy_X_motion;
 				ELSE
 					Enemy_X_pos <= Enemy_X_pos + Enemy_X_motion;
@@ -431,7 +435,7 @@ Move_Tank: process(Player_X_motion,vert_sync_int)
 BEGIN
          -- Move Tank depends horizontally depends onmouse
 			if(vert_sync_int'event and vert_sync_int = '1') then
-			   if(sw0 = '1') then
+			   if(sw3 = '1') then
 				  Player_X_Pos <= CONV_STD_LOGIC_VECTOR(320,10);
 			   else
 			     Player_X_motion <= Mouse_X_motion;
@@ -444,10 +448,10 @@ END process Move_Tank;
 
 bullet_motion <= CONV_STD_LOGIC_VECTOR(10,10);
 bullet_size	  <= CONV_STD_LOGIC_VECTOR(4, 10);
-Tank_Shoot: process(vert_sync_int, bullet_motion, mouse_left_click, sw0)
+Tank_Shoot: process(vert_sync_int, bullet_motion, mouse_left_click, sw3)
 BEGIN		
 			if(vert_sync_int'event and vert_sync_int = '1') then
-				if (sw0 = '1') then
+				if (sw3 = '1') then
 					gameScore1 <= "0000";
 					gameScore10 <= "0000";
 					gameScore100 <= "0000";
@@ -498,10 +502,13 @@ BEGIN
 			end if;
 
 END process Tank_Shoot;
-			
+
+gamescore100_out <= gameScore100;
+gamescore10_out <= gameScore10;
+gamescore1_out <= gameScore1;
 RGB_Display_Bullet: process(bullet_X_Pos, bullet_Y_Pos, pixel_x, pixel_y)
 BEGIN
-	if (sw0 = '1') then
+	if (sw3 = '1') then
 		bullet_on <= '0';
 	else
 		if(bullet_fired = '1') then
