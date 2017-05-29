@@ -943,7 +943,8 @@ if(vert_sync_int'event and vert_sync_int = '1') then
 					end if;
 				end if;
 			end if;
-		when "010" =>
+		when "010" =>		
+			Enemy_X_motion_incrementer <= 2;
 			if (mode_latch /= game_status) then
 				gameScore1 <= "0000";
 				gameScore10 <= "0000";
@@ -964,7 +965,6 @@ if(vert_sync_int'event and vert_sync_int = '1') then
 						('0' & Enemy_Y_Pos + Enemy_Size >= '0' & bullet_Y_Pos) THEN
 						-------------------gamescore counter------------------------------------
 						if gameScore1 = "1001" then
-							Enemy_X_motion_incrementer <= Enemy_X_motion_incrementer + 1;
 							if gameScore10 = "1001" then
 								if gameScore100 = "1001" then
 									gameScore100 <= "0000";
@@ -992,7 +992,8 @@ if(vert_sync_int'event and vert_sync_int = '1') then
 					end if;
 				end if;
 			end if;
-		when "011" =>
+		when "011" =>		
+			Enemy_X_motion_incrementer <= 3;
 			if (mode_latch /= game_status) then
 				gameScore1 <= "0000";
 				gameScore10 <= "0000";
@@ -1013,7 +1014,6 @@ if(vert_sync_int'event and vert_sync_int = '1') then
 						('0' & Enemy_Y_Pos + Enemy_Size >= '0' & bullet_Y_Pos) THEN
 						-------------------gamescore counter------------------------------------
 						if gameScore1 = "1001" then
-							Enemy_X_motion_incrementer <= Enemy_X_motion_incrementer + 1;
 							if gameScore10 = "1001" then
 								if gameScore100 = "1001" then
 									gameScore100 <= "0000";

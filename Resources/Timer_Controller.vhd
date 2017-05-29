@@ -15,7 +15,7 @@ architecture behaviour of Timer_Controller is
 	signal Reset1: std_logic;
 	signal Enabled0: std_logic;
 	signal Enabled1: std_logic;
-	signal Q_Out_Seconds_Ones: std_logic_vector (3 downto 0) := "0000";	
+	signal Q_Out_Seconds_Ones: std_logic_vector (3 downto 0) := "0110";	
 	signal Q_Out_Seconds_Tens: std_logic_vector (3 downto 0) := "0000";	
 	signal Loaded_Value: std_logic_vector(7 downto 0) := "00000000";
 	signal Reset_All: std_logic;
@@ -28,6 +28,12 @@ architecture behaviour of Timer_Controller is
 			Q : out std_logic_vector(3 downto 0));
 	end component BCD_Counter;
 	
+		component BCD_Counter10 is
+		port(	
+			Clk, Init, Enable : in std_logic;
+			Q : out std_logic_vector(3 downto 0));
+	end component BCD_Counter10;
+	
 begin
 	-- Declare port mapping
 	-- C1 counts the ones seconds
@@ -36,7 +42,7 @@ begin
 				Q => Q_Out_Seconds_Ones);
 	
 	-- C2 counts the tens seconds
-	S2: 	BCD_Counter
+	S2: 	BCD_Counter10
 		port map(Clk => Clock, Init => Reset1, Enable => Enabled1,
 					Q => Q_Out_Seconds_Tens);
 	-- Counter logic
@@ -46,7 +52,7 @@ begin
 	Reset0 <= '1' when Start = '1' or Reset_All = '1' else '0';
 	Reset1 <= '1' when Start = '1' or Reset_All = '1' else '0';
 	
-	Start <= '1' when mode = "001" or mode = "010" else '0';
+	Start <= '1' when Mode = "010" or Mode = "011" else '0';
 	
 	process (Clock)
 		begin

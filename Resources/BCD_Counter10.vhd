@@ -2,13 +2,13 @@ library IEEE;
 use IEEE.std_logic_1164.all;
 use IEEE.std_logic_unsigned.all;
 
-entity BCD_Counter is
-	port(Clk, Direction, Init, Enable : in std_logic;
+entity BCD_Counter10 is
+	port(Clk, Init, Enable : in std_logic;
 	     Q : out std_logic_vector(3 downto 0));
-end entity BCD_Counter;
+end entity BCD_Counter10;
 
-architecture beh of BCD_Counter is
-signal s_Q : std_logic_vector(3 downto 0) := "0000";
+architecture beh of BCD_Counter10 is
+signal s_Q : std_logic_vector(3 downto 0) := "0110";
 begin
 	process (Clk)
 		begin
@@ -16,22 +16,12 @@ begin
 			if Enable = '0' then
 				s_Q <= s_Q;
 			elsif (Init = '1') then
-				if Direction = '1' then
-					s_Q <= "1001";
-				else
-					s_Q <= "0000";
-				end if;					
-			elsif Direction = '1' then
-				if s_Q = "0000" then
-					s_Q <= "1001";
+					s_Q <= "0110";			
+			elsif s_Q = "0000" then
+					s_Q <= "0110";
 				else
 					s_Q <= s_Q - 1;
-				end if;
-			elsif s_Q = "1001" then
-				s_Q <= "0000";
-			else
-				s_Q <= s_Q + 1;
-			end if;		
+				end if;		
 		end if;
 	end process;
 	Q <= s_Q;

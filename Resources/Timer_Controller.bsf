@@ -20,7 +20,7 @@ applicable agreement for further details.
 */
 (header "symbol" (version "1.1"))
 (symbol
-	(rect 16 16 216 96)
+	(rect 16 16 224 96)
 	(text "Timer_Controller" (rect 5 0 72 12)(font "Arial" ))
 	(text "inst" (rect 8 64 20 76)(font "Arial" ))
 	(port
@@ -33,25 +33,25 @@ applicable agreement for further details.
 	(port
 		(pt 0 48)
 		(input)
-		(text "Start[2..0]" (rect 0 0 38 12)(font "Arial" ))
-		(text "Start[2..0]" (rect 21 43 59 55)(font "Arial" ))
+		(text "Mode[2..0]" (rect 0 0 42 12)(font "Arial" ))
+		(text "Mode[2..0]" (rect 21 43 63 55)(font "Arial" ))
 		(line (pt 0 48)(pt 16 48)(line_width 3))
 	)
 	(port
-		(pt 200 32)
+		(pt 208 32)
 		(output)
 		(text "Data_Out0[3..0]" (rect 0 0 63 12)(font "Arial" ))
-		(text "Data_Out0[3..0]" (rect 116 27 179 39)(font "Arial" ))
-		(line (pt 200 32)(pt 184 32)(line_width 3))
+		(text "Data_Out0[3..0]" (rect 124 27 187 39)(font "Arial" ))
+		(line (pt 208 32)(pt 192 32)(line_width 3))
 	)
 	(port
-		(pt 200 48)
+		(pt 208 48)
 		(output)
 		(text "Data_Out1[3..0]" (rect 0 0 62 12)(font "Arial" ))
-		(text "Data_Out1[3..0]" (rect 117 43 179 55)(font "Arial" ))
-		(line (pt 200 48)(pt 184 48)(line_width 3))
+		(text "Data_Out1[3..0]" (rect 125 43 187 55)(font "Arial" ))
+		(line (pt 208 48)(pt 192 48)(line_width 3))
 	)
 	(drawing
-		(rectangle (rect 16 16 184 64)(line_width 1))
+		(rectangle (rect 16 16 192 64)(line_width 1))
 	)
 )
