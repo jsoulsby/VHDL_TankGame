@@ -854,7 +854,7 @@ if(vert_sync_int'event and vert_sync_int = '1') then
 			null;
 		when "001" =>
 		-- Move Tank depends horizontally depends onmouse			
-			if(mode_latch /= "001") then
+			if(mode_latch /= game_status) then
 			  Player_X_Pos <= CONV_STD_LOGIC_VECTOR(320,10);
 			else
 			  Player_X_motion <= Mouse_X_motion;
@@ -863,7 +863,7 @@ if(vert_sync_int'event and vert_sync_int = '1') then
 			end if;
 		when "010" =>
 		-- Move Tank depends horizontally depends onmouse
-			if(mode_latch /= "010") then
+			if(mode_latch /= game_status) then
 			  Player_X_Pos <= CONV_STD_LOGIC_VECTOR(320,10);
 			else
 			  Player_X_motion <= Mouse_X_motion;
@@ -872,7 +872,7 @@ if(vert_sync_int'event and vert_sync_int = '1') then
 			end if;
 		when "011" =>
 		-- Move Tank depends horizontally depends onmouse
-			if(mode_latch /= "011") then
+			if(mode_latch /= game_status) then
 			  Player_X_Pos <= CONV_STD_LOGIC_VECTOR(320,10);
 			else
 			  Player_X_motion <= Mouse_X_motion;
@@ -895,7 +895,7 @@ if(vert_sync_int'event and vert_sync_int = '1') then
 		when "000" =>
 			null;
 		when "001" =>
-			if (mode_latch /= "001") then
+			if (mode_latch /= game_status) then
 				gameScore1 <= "0000";
 				gameScore10 <= "0000";
 				gameScore100 <= "0000";
@@ -944,7 +944,7 @@ if(vert_sync_int'event and vert_sync_int = '1') then
 				end if;
 			end if;
 		when "010" =>
-			if (mode_latch /= "010") then
+			if (mode_latch /= game_status) then
 				gameScore1 <= "0000";
 				gameScore10 <= "0000";
 				gameScore100 <= "0000";
@@ -993,7 +993,7 @@ if(vert_sync_int'event and vert_sync_int = '1') then
 				end if;
 			end if;
 		when "011" =>
-			if (mode_latch /= "011") then
+			if (mode_latch /= game_status) then
 				gameScore1 <= "0000";
 				gameScore10 <= "0000";
 				gameScore100 <= "0000";
@@ -1044,6 +1044,7 @@ if(vert_sync_int'event and vert_sync_int = '1') then
 		when others =>
 			null;
 	end case;
+	mode_latch <= game_status;
 end if;	
 END process Tank_Shoot;
 gamescore100_out <= gameScore100;
@@ -1129,16 +1130,4 @@ RNG_Enemy_Position: process (clock)
 				end if;
 			end if;
 end process RNG_Enemy_Position;
-
-Memory_latch: process (game_status)
-	BEGIN
-		if (clock'event and clock = '1') then
-			timer10_latch <= timer1;
-			timer1_latch <= timer0;
-			score100_latch <= gamescore100;
-			score10_latch <= gamescore10;
-			score1_latch <= gamescore1;
-			mode_latch <= game_status;
-		end if;
-	end process;
 END SYN;
