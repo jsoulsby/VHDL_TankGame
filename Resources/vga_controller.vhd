@@ -266,9 +266,12 @@ begin
 		     char_address_screen32 <= "010111"; -- W
 	      elsif pix_x(9 downto 3) >= 40 and pix_x(9 downto 3) <= 43 then
 	        char_address_screen32 <= "001001"; -- I
-	      elsif pix_x(9 downto 3) >= 43 and pix_x(9 diwnto 3) <= 46 then 
+	      elsif pix_x(9 downto 3) >= 43 and pix_x(9 downto 3) <= 46 then 
 	        char_address_screen32 <= "001110"; -- N
 			end if;
+		when others =>
+		    screen32_on <= '0';
+			 screen16_on <= '0';
 	   end case;
 end process;
 
