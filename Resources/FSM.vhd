@@ -22,10 +22,10 @@ Entity FSM is
 		   SW1:           in std_logic;
 			--sw1
 			SW2:           in std_logic;
+			Player_Lose:	in std_logic;
 			gamescore100:  in std_logic_vector (3 downto 0);
 			gamescore10:   in std_logic_vector (3 downto 0);
 			gamescore1:   in std_logic_vector (3 downto 0);
-			Enable:        out std_logic;
 			-- 0 is training mode, 9 is game failed, 10 is idle start screen
 			Mode:          out std_logic_vector (2 downto 0)
 );
@@ -62,14 +62,14 @@ begin
 		    mode <= "010";
 		    if (gamescore10 >= 1) then
 			   y <= level2;
-			 elsif (leveltime10 = "0000" and leveltime1 = "0001") then
+			 elsif ((leveltime10 = "0000" and leveltime1 = "0000") or Player_Lose = '1') then
 			   y <= gamefailed;
 			 end if;
 		  when level2 =>
 			mode <= "011";
 			 if (gamescore10 >= 1 and gamescore1 >= 5) then
 			   y <= wingame; 
-			elsif (leveltime10 = "0000" and leveltime1 = "0001") then
+			elsif ((leveltime10 = "0000" and leveltime1 = "0000") or Player_Lose = '1') then
 				y <= gamefailed;
 			 end if;
 		  when gamefailed =>

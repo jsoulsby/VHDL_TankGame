@@ -19,6 +19,7 @@ architecture behaviour of Timer_Controller is
 	signal Q_Out_Seconds_Tens: std_logic_vector (3 downto 0) := "0000";	
 	signal Loaded_Value: std_logic_vector(7 downto 0) := "00000000";
 	signal Reset_All: std_logic;
+	signal Start_latch: std_logic_vector(2 downto 0) := "000";
 	signal Start: std_logic;
 	
 	-- Component counter
@@ -47,27 +48,26 @@ begin
 					Q => Q_Out_Seconds_Tens);
 	-- Counter logic
 	Enabled0 <= '1' when (Started = '1') or Reset_All = '1' else '0';
-	Enabled1 <= '1' when (Q_Out_Seconds_Ones = "1001") or Reset_All = '1' else '0';
+	Enabled1 <= '1' when (Q_Out_Seconds_Ones = "0000") or Reset_All = '1' else '0';
 	
 	Reset0 <= '1' when Start = '1' or Reset_All = '1' else '0';
 	Reset1 <= '1' when Start = '1' or Reset_All = '1' else '0';
-	
-	Start <= '1' when Mode = "010" or Mode = "011" else '0';
-	
+	Start <= '1' when (start_latch /= Mode) and (Mode = "010" or Mode = "011") else '0';
 	process (Clock)
 		begin
 		if rising_edge(Clock) then
 			if (Start = '1') then
-				Started <= '1';
-				Reset_All <= '0';
+					Started <= '1';
+					Reset_All <= '0';
 			end if;
 
 			if (Q_Out_Seconds_Ones = Loaded_Value(3 downto 0)
 			and  Q_Out_Seconds_Tens = Loaded_Value(7 downto 4)) then
 				Started <= '0';
 				Reset_All <= '1';
-			end if;				
-		end if;
+			end if;		
+			start_latch <= Mode;			
+		end if;		
 	end process;
 			Data_Out0 <= Q_Out_Seconds_Ones;
 			Data_Out1 <= Q_Out_Seconds_Tens;

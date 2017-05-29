@@ -23,7 +23,8 @@ ENTITY vga_controller IS
 		red,green,blue						:	OUT STD_LOGIC;
 		gameScore100_out					:	OUT STD_LOGIC_VECTOR(3 DOWNTO 0);
 		gameScore10_out					:	OUT STD_LOGIC_VECTOR(3 DOWNTO 0);
-		gameScore1_out						:	OUT STD_LOGIC_VECTOR(3 DOWNTO 0)
+		gameScore1_out						:	OUT STD_LOGIC_VECTOR(3 DOWNTO 0);
+		Player_Lose							:	OUT STD_LOGIC
 	);
 END vga_controller;
 
@@ -55,11 +56,13 @@ ARCHITECTURE SYN OF vga_controller IS
 	SIGNAL Enemy_Size 														: STD_LOGIC_VECTOR(9 DOWNTO 0);  
 	SIGNAL Enemy_X_motion													: STD_LOGIC_VECTOR(9 DOWNTO 0);
 	SIGNAL Enemy_X_motion_incrementer									: integer := 2;	
-	SIGNAL Enemy_Y_pos, Enemy_X_pos										: STD_LOGIC_VECTOR(9 DOWNTO 0);
+	SIGNAL Enemy_Y_pos														: STD_LOGIC_VECTOR(9 DOWNTO 0) := CONV_STD_LOGIC_VECTOR(25,10);
+	SIGNAL Enemy_X_pos														: STD_LOGIC_VECTOR(9 DOWNTO 0);
 	SIGNAL EnemyTank_On														: STD_LOGIC;
 	SIGNAL counter																: positive := 10;
 	SIGNAL rng_direction														: STD_LOGIC;
-	SIGNAL enemy_fsm															: STD_LOGIC_VECTOR(1 DOWNTO 0) := "00";
+	SIGNAL enemy_fsm															: STD_LOGIC_VECTOR(1 DOWNTO 0) := "00";	
+	SIGNAL respawn_latch														: STD_LOGIC := '0';
 	
 	------------------------------- Player Tank Display Signals -----------------------------------
 	SIGNAL Player_Size														: STD_LOGIC_VECTOR(9 DOWNTO 0);
@@ -88,7 +91,6 @@ ARCHITECTURE SYN OF vga_controller IS
 	-------------------------------- Memory Latches --------------------------------------------------
 	SIGNAL timer10_latch, timer1_latch									: STD_LOGIC_VECTOR(3 DOWNTO 0);
 	SIGNAL score100_latch, score10_latch, score1_latch				: STD_LOGIC_VECTOR(3 DOWNTO 0);
-	SIGNAL mode_latch															: STD_LOGIC_VECTOR(2 DOWNTO 0);
 	--------------------------------------------------------------------------------------------------
 	COMPONENT altsyncram
 	GENERIC (
@@ -723,7 +725,6 @@ end process;
 -----------------ENEMY TANK DISPLAY AND PROCESSES-------------------------------	
 	
 Enemy_Size <= CONV_STD_LOGIC_VECTOR(8,10);	--ENEMY TANK SIZE HERE
-Enemy_Y_pos <= CONV_STD_LOGIC_VECTOR(25,10);
 
 RGB_Display_EnemyTank: Process (Enemy_X_pos, Enemy_Y_pos, pixel_y, pixel_x, Enemy_Size)
 BEGIN
@@ -777,8 +778,18 @@ BEGIN
 				-- Bounce off left or right of screen
 				IF ('0' & Enemy_X_pos) >= '0' & CONV_STD_LOGIC_VECTOR(639,10) - Enemy_Size THEN
 					Enemy_X_motion <=  CONV_STD_LOGIC_VECTOR(-Enemy_X_motion_incrementer,10); -- negative 2
+					if (Enemy_Y_Pos >= CONV_STD_LOGIC_VECTOR(400, 10)) then
+							Enemy_Y_Pos <= CONV_STD_LOGIC_VECTOR(25, 10);
+						else
+							Enemy_Y_Pos <= Enemy_Y_Pos + 40;
+					end if;
 				ELSIF ('0' & Enemy_X_pos) <= Enemy_Size THEN
 					Enemy_X_motion <= CONV_STD_LOGIC_VECTOR(Enemy_X_motion_incrementer,10);
+					if (Enemy_Y_Pos >= CONV_STD_LOGIC_VECTOR(400, 10)) then
+						Enemy_Y_Pos <= CONV_STD_LOGIC_VECTOR(25, 10);
+					else
+						Enemy_Y_Pos <= Enemy_Y_Pos + 40;						
+					end if;
 				END IF;
 				-- Compute next enemy Y position
 				IF(PB1 = '0') then
@@ -787,16 +798,18 @@ BEGIN
 					Enemy_X_pos <= Enemy_X_pos + Enemy_X_motion;
 				END IF;					
 			when others =>
-				Enemy_X_Pos <= CONV_STD_LOGIC_VECTOR(counter, 10);
+				Enemy_X_Pos <= CONV_STD_LOGIC_VECTOR(counter, 10);				
+				Enemy_Y_pos <= CONV_STD_LOGIC_VECTOR(25,10);
 					if (rng_direction = '1') then
 						Enemy_X_motion <= CONV_STD_LOGIC_VECTOR(Enemy_X_motion_incrementer,10);
 					else
 						Enemy_X_motion <= CONV_STD_LOGIC_VECTOR(-Enemy_X_motion_incrementer,10);
-					end if;
+					end if;	
 		end case;
 			
 END process Move_Enemy;
 
+Player_Lose <= '1' when (Enemy_Y_Pos >= CONV_STD_LOGIC_VECTOR(400, 10)) else '0';
 
 --------------------------------- PLAYER TANK AND PROCESSES --------------------------------------
 
@@ -854,31 +867,18 @@ if(vert_sync_int'event and vert_sync_int = '1') then
 			null;
 		when "001" =>
 		-- Move Tank depends horizontally depends onmouse			
-			if(mode_latch /= game_status) then
-			  Player_X_Pos <= CONV_STD_LOGIC_VECTOR(320,10);
-			else
 			  Player_X_motion <= Mouse_X_motion;
 			  -- Compute next tank x position
 			  Player_X_pos <= Player_X_motion;
-			end if;
 		when "010" =>
 		-- Move Tank depends horizontally depends onmouse
-			if(mode_latch /= game_status) then
-			  Player_X_Pos <= CONV_STD_LOGIC_VECTOR(320,10);
-			else
 			  Player_X_motion <= Mouse_X_motion;
 			  -- Compute next tank x position
 			  Player_X_pos <= Player_X_motion;
-			end if;
 		when "011" =>
-		-- Move Tank depends horizontally depends onmouse
-			if(mode_latch /= game_status) then
-			  Player_X_Pos <= CONV_STD_LOGIC_VECTOR(320,10);
-			else
-			  Player_X_motion <= Mouse_X_motion;
+				Player_X_motion <= Mouse_X_motion;
 			  -- Compute next tank x position
 			  Player_X_pos <= Player_X_motion;
-			end if;
 		when others =>
 			null;
 	end case;
@@ -895,12 +895,6 @@ if(vert_sync_int'event and vert_sync_int = '1') then
 		when "000" =>
 			null;
 		when "001" =>
-			if (mode_latch /= game_status) then
-				gameScore1 <= "0000";
-				gameScore10 <= "0000";
-				gameScore100 <= "0000";
-				bullet_fired <= '0';
-			else 
 				enemy_fsm <= "00";
 				if(bullet_fired = '0' and mouse_left_click = '1') then
 						bullet_fired <= '1';
@@ -942,16 +936,9 @@ if(vert_sync_int'event and vert_sync_int = '1') then
 						enemy_fsm <= "00";
 					end if;
 				end if;
-			end if;
 		when "010" =>		
+			enemy_fsm <= "00";
 			Enemy_X_motion_incrementer <= 2;
-			if (mode_latch /= game_status) then
-				gameScore1 <= "0000";
-				gameScore10 <= "0000";
-				gameScore100 <= "0000";
-				bullet_fired <= '0';
-			else 
-				enemy_fsm <= "00";
 				if(bullet_fired = '0' and mouse_left_click = '1') then
 						bullet_fired <= '1';
 						bullet_Y_Pos <= CONV_STD_LOGIC_VECTOR(410, 10); --hard coded to be just above player tank
@@ -991,16 +978,8 @@ if(vert_sync_int'event and vert_sync_int = '1') then
 						enemy_fsm <= "00";
 					end if;
 				end if;
-			end if;
 		when "011" =>		
 			Enemy_X_motion_incrementer <= 3;
-			if (mode_latch /= game_status) then
-				gameScore1 <= "0000";
-				gameScore10 <= "0000";
-				gameScore100 <= "0000";
-				bullet_fired <= '0';
-			else 
-				enemy_fsm <= "00";
 				if(bullet_fired = '0' and mouse_left_click = '1') then
 						bullet_fired <= '1';
 						bullet_Y_Pos <= CONV_STD_LOGIC_VECTOR(410, 10); --hard coded to be just above player tank
@@ -1040,11 +1019,9 @@ if(vert_sync_int'event and vert_sync_int = '1') then
 						enemy_fsm <= "00";
 					end if;
 				end if;
-			end if;
 		when others =>
 			null;
 	end case;
-	mode_latch <= game_status;
 end if;	
 END process Tank_Shoot;
 gamescore100_out <= gameScore100;
@@ -1057,10 +1034,7 @@ BEGIN
 		when "000" =>
 			null;
 		when "001" =>		
-			if (mode_latch /= "001") then
-				bullet_on <= '0';
-			else
-				if(bullet_fired = '1') then
+			if(bullet_fired = '1') then
 					IF ('0' & bullet_X_Pos <= '0' & pixel_x + bullet_Size) AND
 							-- compare positive numbers only
 						('0' & bullet_X_Pos + bullet_Size >= '0' & pixel_x) AND
@@ -1073,12 +1047,8 @@ BEGIN
 				ELSE	
 					bullet_on <= '0';
 				END IF;
-			end if;
 		when "010" =>
-			if (mode_latch /= "010") then
-				bullet_on <= '0';
-			else
-				if(bullet_fired = '1') then
+			if(bullet_fired = '1') then
 					IF ('0' & bullet_X_Pos <= '0' & pixel_x + bullet_Size) AND
 							-- compare positive numbers only
 						('0' & bullet_X_Pos + bullet_Size >= '0' & pixel_x) AND
@@ -1091,12 +1061,8 @@ BEGIN
 				ELSE	
 					bullet_on <= '0';
 				END IF;
-			end if;
 		when "011" =>
-			if (mode_latch /= "011") then
-				bullet_on <= '0';
-			else
-				if(bullet_fired = '1') then
+			if(bullet_fired = '1') then
 					IF ('0' & bullet_X_Pos <= '0' & pixel_x + bullet_Size) AND
 							-- compare positive numbers only
 						('0' & bullet_X_Pos + bullet_Size >= '0' & pixel_x) AND
@@ -1109,7 +1075,6 @@ BEGIN
 				ELSE	
 					bullet_on <= '0';
 				END IF;
-			end if;
 		when others =>
 			null;
 	end case;
@@ -1130,4 +1095,5 @@ RNG_Enemy_Position: process (clock)
 				end if;
 			end if;
 end process RNG_Enemy_Position;
+
 END SYN;
