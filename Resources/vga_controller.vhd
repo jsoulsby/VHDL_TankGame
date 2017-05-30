@@ -709,7 +709,6 @@ end process;
 		end if;
 	end if;
 	end process;
-	lvl1 <= '0' when game_status = "011" else '0';
 	text_on <= score_on and time_on;
 	rom_address <= char_address & font_row;
 	rom_mux_output <= rom_data (CONV_INTEGER(NOT font_col(2 DOWNTO 0)));
