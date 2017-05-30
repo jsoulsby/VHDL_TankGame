@@ -2,7 +2,6 @@ LIBRARY ieee;
 USE ieee.std_logic_1164.all;
 USE IEEE.STD_LOGIC_ARITH.all;
 USE IEEE.STD_LOGIC_UNSIGNED.all;
-
 LIBRARY altera_mf;
 USE altera_mf.all;
 
@@ -61,8 +60,7 @@ ARCHITECTURE SYN OF vga_controller IS
 	SIGNAL EnemyTank_On														: STD_LOGIC;
 	SIGNAL counter																: positive := 10;
 	SIGNAL rng_direction														: STD_LOGIC;
-	SIGNAL enemy_fsm															: STD_LOGIC_VECTOR(1 DOWNTO 0) := "00";	
-	SIGNAL respawn_latch														: STD_LOGIC := '0';
+	SIGNAL enemy_fsm															: STD_LOGIC_VECTOR(1 DOWNTO 0) := "00";
 	
 	------------------------------- Player Tank Display Signals -----------------------------------
 	SIGNAL Player_Size														: STD_LOGIC_VECTOR(9 DOWNTO 0);
@@ -86,11 +84,6 @@ ARCHITECTURE SYN OF vga_controller IS
 	SIGNAL bullet_Size														: STD_LOGIC_VECTOR(9 DOWNTO 0);
 	SIGNAL font_col_bullet, font_row_bullet							: STD_LOGIC_VECTOR(2 DOWNTO 0);
 	SIGNAL char_address_bullet												: STD_LOGIC_VECTOR(5 DOWNTO 0);
-	SIGNAL bulx, buly															: STD_LOGIC_VECTOR(9 DOWNTO 0);
-	
-	-------------------------------- Memory Latches --------------------------------------------------
-	SIGNAL timer10_latch, timer1_latch									: STD_LOGIC_VECTOR(3 DOWNTO 0);
-	SIGNAL score100_latch, score10_latch, score1_latch				: STD_LOGIC_VECTOR(3 DOWNTO 0);
 	--------------------------------------------------------------------------------------------------
 	COMPONENT altsyncram
 	GENERIC (
@@ -691,8 +684,8 @@ end process;
 	
 	if EnemyTank_On = '1' then
 		red <= '0';
-		green <= '0';
-		blue <= '1';
+		green <= '1';
+		blue <= '0';
 	end if;
 	
 	if score_on = '1' then
@@ -716,7 +709,7 @@ end process;
 		end if;
 	end if;
 	end process;
-	
+	lvl1 <= '0' when game_status = "011" else '0';
 	text_on <= score_on and time_on;
 	rom_address <= char_address & font_row;
 	rom_mux_output <= rom_data (CONV_INTEGER(NOT font_col(2 DOWNTO 0)));
@@ -772,7 +765,8 @@ END process RGB_Display_Enemytank;
 Move_Enemy: process
 BEGIN
 			-- Move enemy once every vertical sync
-	WAIT UNTIL vert_sync_int'event and vert_sync_int = '1';		
+	WAIT UNTIL vert_sync_int'event and vert_sync_int = '1';	
+		
 		case enemy_fsm is
 			when "00" =>
 				-- Bounce off left or right of screen
@@ -886,11 +880,15 @@ bullet_motion <= CONV_STD_LOGIC_VECTOR(10,10);
 bullet_size	  <= CONV_STD_LOGIC_VECTOR(4, 10);
 
 Tank_Shoot: process(vert_sync_int, bullet_motion, mouse_left_click, sw3)
+variable score_latch : std_logic := '0';
 BEGIN
 if(vert_sync_int'event and vert_sync_int = '1') then
 	case game_status is
 		when "000" =>
-			null;
+			enemy_fsm <= "01";
+			gameScore100 <= "0000";
+			gameScore10 <= "0000";
+			gameScore1 <= "0000";
 		when "001" =>
 				enemy_fsm <= "00";
 				if(bullet_fired = '0' and mouse_left_click = '1') then
@@ -975,7 +973,15 @@ if(vert_sync_int'event and vert_sync_int = '1') then
 						enemy_fsm <= "00";
 					end if;
 				end if;
+				score_latch := '0';
 		when "011" =>		
+			if score_latch = '0' then
+				gameScore100 <= "0000";
+				gameScore10 <= "0000";
+				gameScore1 <= "0000";	
+				score_latch := '1';
+			end if;
+			enemy_fsm <= "00";
 			Enemy_X_motion_incrementer <= 3;
 				if(bullet_fired = '0' and mouse_left_click = '1') then
 						bullet_fired <= '1';
@@ -1017,7 +1023,10 @@ if(vert_sync_int'event and vert_sync_int = '1') then
 					end if;
 				end if;
 		when others =>
-			null;
+			enemy_fsm <= "01";
+			gameScore100 <= "0000";
+			gameScore10 <= "0000";
+			gameScore1 <= "0000";			
 	end case;
 end if;	
 END process Tank_Shoot;
@@ -1085,7 +1094,7 @@ RNG_Enemy_Position: process (clock)
 				else
 					counter <= counter + 1;
 				end if;
-				if (counter mod 2 = 0) then
+				if (CONV_INTEGER(timer0) mod 2 = 0) then
 					rng_direction <= '1';
 				else
 					rng_direction <= '0';

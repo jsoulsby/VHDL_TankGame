@@ -32,7 +32,7 @@ Entity FSM is
   
 End FSM;
 architecture behaviour of FSM is
-Type state_type is (idle,level0,level1,level2,wingame,gamefailed);
+Type state_type is (idle,level0,level1,level2,win,lose);
 Signal y: state_type := idle;
 begin
   process(clk,reset)
@@ -40,7 +40,7 @@ begin
     if (Reset = '0') then
 	   y <= idle; 
 	 elsif (Quit = '0') then
-	   y <= wingame;
+	   y <= win;
 	 elsif(SW0 = '1') then
 	   y <= level0;
 	 elsif(SW1 = '1') then
@@ -51,9 +51,9 @@ begin
 	   case y is 
 	     when idle =>
 	       Mode <= "000";
-		    if (left_click = '1') then
+		    if (right_click = '1') then
 		      y <= level1;
-		    elsif (right_click = '1') then
+		    elsif (SW0 = '1') then
 			   y <= level0;
 			 end if;
 	     when level0 =>
@@ -63,23 +63,23 @@ begin
 		    if (gamescore10 >= 1) then
 			   y <= level2;
 			 elsif ((leveltime10 = "0000" and leveltime1 = "0000") or Player_Lose = '1') then
-			   y <= gamefailed;
+			   y <= lose;
 			 end if;
 		  when level2 =>
 			mode <= "011";
 			 if (gamescore10 >= 1 and gamescore1 >= 5) then
-			   y <= wingame; 
+			   y <= win; 
 			elsif ((leveltime10 = "0000" and leveltime1 = "0000") or Player_Lose = '1') then
-				y <= gamefailed;
+				y <= lose;
 			 end if;
-		  when gamefailed =>
+		  when lose =>
 		    mode <= "100";
-				if (left_click = '1' or right_click = '1') then
+				if (left_click = '1') then
 			   y <= idle;
 			 end if;
-		  when wingame =>
+		  when win =>
 		      mode <= "101";
-				if (left_click = '1' or right_click = '1') then
+				if (left_click = '1') then
 		        y <= idle;
 				end if;
 		  end case;

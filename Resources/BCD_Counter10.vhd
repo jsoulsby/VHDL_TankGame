@@ -8,8 +8,8 @@ entity BCD_Counter10 is
 end entity BCD_Counter10;
 
 architecture beh of BCD_Counter10 is
-signal s_Q : std_logic_vector(3 downto 0) := "0110";
-signal counter: integer := 0;
+signal s_Q : std_logic_vector(3 downto 0) := "0101";
+signal counter : integer := 0;
 begin
 	process (Clk)
 		begin
@@ -18,11 +18,11 @@ begin
 				s_Q <= s_Q;
 				counter <= counter;
 			elsif (Init = '1') then
-					s_Q <= "0110";			
+					s_Q <= "0101";			
 					counter <= 0;
 			elsif counter = 25000000 then			
 				if s_Q = "0000" then
-					s_Q <= "0110";
+					s_Q <= "0101";
 				else
 				s_Q <= s_Q - 1;
 				end if;
