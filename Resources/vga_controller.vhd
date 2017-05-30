@@ -158,7 +158,7 @@ begin
 			 else 
 				 screen32_on <= '0';
 			 end if;
-			 if pix_y(9 downto 3) >= 32 and pix_y(9 downto 3) <= 35 and pix_x(9 downto 3) >= 24 and pix_x(9 downto 3) <= 59 then
+			 if pix_y(9 downto 3) >= 32 and pix_y(9 downto 3) <= 33 and pix_x(9 downto 3) >= 24 and pix_x(9 downto 3) <= 59 then
              screen16_on <= '1';
           else 
              screen16_on <= '0';
@@ -228,47 +228,47 @@ begin
 				char_address_screen16 <= "101101";  -- "-"
 			end if;
 		when "100" =>
-		   if pix_y(9 downto 3) >= 16 and pix_y(9 downto 3) <= 19 and pix_x(9 downto 3) >= 16 and pix_x(9 downto 3) <= 63 then
+		   if pix_y(9 downto 3) >= 16 and pix_y(9 downto 3) <= 19 and pix_x(9 downto 3) >= 24 and pix_x(9 downto 3) <= 55 then
 				screen32_on <= '1';
 			else 
 				screen32_on <= '0';
 			end if;
-			if pix_x(9 downto 3) >= 16 and pix_x(9 downto 3) <= 19 then
+			if pix_x(9 downto 3) >= 24 and pix_x(9 downto 3) <= 27 then
 				char_address_screen32 <= "011001";  -- Y (25)
-			elsif pix_x(9 downto 3) >= 20 and pix_x(9 downto 3) <= 23 then	
+			elsif pix_x(9 downto 3) >= 28 and pix_x(9 downto 3) <= 31 then	
 				char_address_screen32 <= "001111";  -- O 
-			elsif pix_x(9 downto 3) >= 24 and pix_x(9 downto 3) <= 27 then 
+			elsif pix_x(9 downto 3) >= 32 and pix_x(9 downto 3) <= 35 then 
 				char_address_screen32 <= "010101";  -- U
-			elsif pix_x(9 downto 3) >= 28 and pix_x(9 downto 3) <= 31 then
-				char_address_screen32 <= "100000"; -- space
-			elsif pix_x(9 downto 3) >= 32 and pix_x(9 downto 3) <= 35 then
-				char_address_screen32 <= "001100"; -- L
 			elsif pix_x(9 downto 3) >= 36 and pix_x(9 downto 3) <= 39 then
-				char_address_screen32 <= "001111"; -- O
+				char_address_screen32 <= "100000"; -- space
 			elsif pix_x(9 downto 3) >= 40 and pix_x(9 downto 3) <= 43 then
-				char_address_screen32 <= "010011"; -- S (19)
+				char_address_screen32 <= "001100"; -- L
 			elsif pix_x(9 downto 3) >= 44 and pix_x(9 downto 3) <= 47 then
+				char_address_screen32 <= "001111"; -- O
+			elsif pix_x(9 downto 3) >= 48 and pix_x(9 downto 3) <= 51 then
+				char_address_screen32 <= "010011"; -- S (19)
+			elsif pix_x(9 downto 3) >= 52 and pix_x(9 downto 3) <= 55 then
 				char_address_screen32 <= "000101"; -- E
 			end if;
 		when "101" =>
-			if pix_y(9 downto 3) >= 16 and pix_y(9 downto 3) <= 19 and pix_x(9 downto 3) >= 16 and pix_x(9 downto 3) <= 63 then
+			if pix_y(9 downto 3) >= 16 and pix_y(9 downto 3) <= 19 and pix_x(9 downto 3) >= 24 and pix_x(9 downto 3) <= 51 then
 				screen32_on <= '1';
 			else 
 				screen32_on <= '0';
 			end if;
-			if pix_x(9 downto 3) >= 20 and pix_x(9 downto 3) <= 23 then
+			if pix_x(9 downto 3) >= 24 and pix_x(9 downto 3) <= 27 then
 	        char_address_screen32 <= "011001";  -- Y (25)
-	      elsif pix_x(9 downto 3) >= 24 and pix_x(9 downto 3) <= 27 then	
+	      elsif pix_x(9 downto 3) >= 28 and pix_x(9 downto 3) <= 31 then	
 	        char_address_screen32 <= "001111";  -- O 
-	      elsif pix_x(9 downto 3) >= 28 and pix_x(9 downto 3) <= 31 then 
+	      elsif pix_x(9 downto 3) >= 32 and pix_x(9 downto 3) <= 35 then 
 	        char_address_screen32 <= "010101";  -- U
-	      elsif pix_x(9 downto 3) >= 32 and pix_x(9 downto 3) <= 35 then
-	        char_address_screen32 <= "100000"; -- space;
 	      elsif pix_x(9 downto 3) >= 36 and pix_x(9 downto 3) <= 39 then
-		     char_address_screen32 <= "010111"; -- W
+	        char_address_screen32 <= "100000"; -- space;
 	      elsif pix_x(9 downto 3) >= 40 and pix_x(9 downto 3) <= 43 then
+		     char_address_screen32 <= "010111"; -- W
+	      elsif pix_x(9 downto 3) >= 44 and pix_x(9 downto 3) <= 47 then
 	        char_address_screen32 <= "001001"; -- I
-	      elsif pix_x(9 downto 3) >= 43 and pix_x(9 downto 3) <= 46 then 
+	      elsif pix_x(9 downto 3) >= 48 and pix_x(9 downto 3) <= 51 then 
 	        char_address_screen32 <= "001110"; -- N
 			end if;
 		when others =>
@@ -724,7 +724,7 @@ end process;
 	
 -----------------ENEMY TANK DISPLAY AND PROCESSES-------------------------------	
 	
-Enemy_Size <= CONV_STD_LOGIC_VECTOR(8,10);	--ENEMY TANK SIZE HERE
+Enemy_Size <= CONV_STD_LOGIC_VECTOR(16,10);	--ENEMY TANK SIZE HERE
 
 RGB_Display_EnemyTank: Process (Enemy_X_pos, Enemy_Y_pos, pixel_y, pixel_x, Enemy_Size)
 BEGIN
@@ -781,22 +781,19 @@ BEGIN
 					if (Enemy_Y_Pos >= CONV_STD_LOGIC_VECTOR(400, 10)) then
 							Enemy_Y_Pos <= CONV_STD_LOGIC_VECTOR(25, 10);
 						else
-							Enemy_Y_Pos <= Enemy_Y_Pos + 40;
+							Enemy_Y_Pos <= Enemy_Y_Pos + 24;
 					end if;
 				ELSIF ('0' & Enemy_X_pos) <= Enemy_Size THEN
 					Enemy_X_motion <= CONV_STD_LOGIC_VECTOR(Enemy_X_motion_incrementer,10);
 					if (Enemy_Y_Pos >= CONV_STD_LOGIC_VECTOR(400, 10)) then
 						Enemy_Y_Pos <= CONV_STD_LOGIC_VECTOR(25, 10);
 					else
-						Enemy_Y_Pos <= Enemy_Y_Pos + 40;						
+						Enemy_Y_Pos <= Enemy_Y_Pos + 24;						
 					end if;
 				END IF;
-				-- Compute next enemy Y position
-				IF(PB1 = '0') then
-					Enemy_X_pos <= Enemy_X_pos + Enemy_X_motion + Enemy_X_motion;
-				ELSE
+				-- Compute next enemy X positio
 					Enemy_X_pos <= Enemy_X_pos + Enemy_X_motion;
-				END IF;					
+									
 			when others =>
 				Enemy_X_Pos <= CONV_STD_LOGIC_VECTOR(counter, 10);				
 				Enemy_Y_pos <= CONV_STD_LOGIC_VECTOR(25,10);
@@ -813,7 +810,7 @@ Player_Lose <= '1' when (Enemy_Y_Pos >= CONV_STD_LOGIC_VECTOR(400, 10)) else '0'
 
 --------------------------------- PLAYER TANK AND PROCESSES --------------------------------------
 
-Player_Size <= CONV_STD_LOGIC_VECTOR(8,10);
+Player_Size <= CONV_STD_LOGIC_VECTOR(16,10);
 Player_Y_pos <= CONV_STD_LOGIC_VECTOR(420,10);
 
 RGB_Display_PlayerTank: Process (Player_X_Pos, Player_Y_Pos, pixel_y, pixel_x, Player_Size)
