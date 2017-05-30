@@ -53,12 +53,15 @@ ARCHITECTURE SYN OF vga_controller IS
 	
 	-------------------------------- Enemy Tank Display Signals   -----------------------------------
 	SIGNAL Enemy_Size 														: STD_LOGIC_VECTOR(9 DOWNTO 0);  
-	SIGNAL Enemy_X_motion													: STD_LOGIC_VECTOR(9 DOWNTO 0);
+	SIGNAL Enemy_X_motion, Enemy2_X_motion													: STD_LOGIC_VECTOR(9 DOWNTO 0);
 	SIGNAL Enemy_X_motion_incrementer									: integer := 2;	
 	SIGNAL Enemy_Y_pos														: STD_LOGIC_VECTOR(9 DOWNTO 0) := CONV_STD_LOGIC_VECTOR(25,10);
+	SIGNAL Enemy2_Y_pos														: STD_LOGIC_VECTOR(9 DOWNTO 0) := CONV_STD_LOGIC_VECTOR(60,10);
 	SIGNAL Enemy_X_pos														: STD_LOGIC_VECTOR(9 DOWNTO 0);
-	SIGNAL EnemyTank_On														: STD_LOGIC;
-	SIGNAL counter																: positive := 10;
+	SIGNAL Enemy2_X_pos														: STD_LOGIC_VECTOR(9 DOWNTO 0);
+   SIGNAL EnemyTank_On														: STD_LOGIC;
+	SIGNAL EnemyTank2_On														: STD_LOGIC;
+	SIGNAL counter,counter1															: positive := 10;
 	SIGNAL rng_direction														: STD_LOGIC;
 	SIGNAL enemy_fsm															: STD_LOGIC_VECTOR(1 DOWNTO 0) := "00";
 	
@@ -83,7 +86,8 @@ ARCHITECTURE SYN OF vga_controller IS
 	SIGNAL bullet_Y_Pos														: STD_LOGIC_VECTOR(9 DOWNTO 0);
 	SIGNAL bullet_Size														: STD_LOGIC_VECTOR(9 DOWNTO 0);
 	SIGNAL font_col_bullet, font_row_bullet							: STD_LOGIC_VECTOR(2 DOWNTO 0);
-	SIGNAL char_address_bullet												: STD_LOGIC_VECTOR(5 DOWNTO 0);
+	SIGNAL char_address_bullet												: STD_LOGIC_VECTOR(5 DOWNTO 0);  
+   SIGNAL Tank1HIT, Tank2HIT	                                 : STD_LOGIC;
 	--------------------------------------------------------------------------------------------------
 	COMPONENT altsyncram
 	GENERIC (
@@ -156,8 +160,6 @@ begin
           else 
              screen16_on <= '0';
           end if;
---			 font_row_screen32 <= STD_LOGIC_VECTOR(pix_y(4 downto 2));
---			 font_col_screen32 <= STD_LOGIC_VECTOR(pix_x(4 downto 2));
 			 if pix_x(9 downto 3) >= 16 and pix_x(9 downto 3) <= 19 then
 				 char_address_screen32 <= "010100";  -- T 
 			 elsif pix_x(9 downto 3) >= 20 and pix_x(9 downto 3) <= 23 then
@@ -631,17 +633,6 @@ end process;
 	red <= '0';
 	green <= '0';
 	blue <= '0';	
-	
---	if screen_On = '1' then
---	   char_address <= char_address_screen;
---		font_row <= font_row_screen;
---		font_col <= font_col_screen;
---		if rom_mux_output = '1' then
---		   red <= '1';
---		   blue <= '0';
---		   green <= '0';
---		end if;
---	end if;	
 
 	if screen32_On = '1' then
 	   char_address <= char_address_screen32;
@@ -682,13 +673,13 @@ end process;
 		end if;
 	end if;
 	
-	if EnemyTank_On = '1' then
+	if EnemyTank_On = '1' OR EnemyTank2_On = '1' then
 		red <= '0';
 		green <= '1';
 		blue <= '0';
 	end if;
 	
-	if score_on = '1' then
+   if score_on = '1' then
 		char_address <= char_address_score;
 		font_row <= font_row_score;
 		font_col <= font_col_score;
@@ -698,6 +689,7 @@ end process;
 			blue <= '1';
 		end if;
 	end if;
+	
 	if time_on = '1' then
 		char_address <= char_address_timer;
 		font_row <= font_row_timer;
@@ -709,7 +701,7 @@ end process;
 		end if;
 	end if;
 	end process;
-	lvl1 <= '0' when game_status = "011" else '0';
+
 	text_on <= score_on and time_on;
 	rom_address <= char_address & font_row;
 	rom_mux_output <= rom_data (CONV_INTEGER(NOT font_col(2 DOWNTO 0)));
@@ -724,6 +716,7 @@ BEGIN
 	case game_status is
 		when "000" =>
 			EnemyTank_On <= '0';
+			EnemyTank2_On <= '0';
 		when "001" =>
 			-- Set EnemyTank_On ='1' to display ball
 			IF ('0' & Enemy_X_pos <= '0' & pixel_x + Enemy_Size) AND
@@ -735,6 +728,17 @@ BEGIN
 			ELSE
 					EnemyTank_On <= '0';
 			END IF;
+			
+			IF ('0' & Enemy2_X_pos <= '0' & pixel_x + Enemy_Size) AND
+						-- compare positive numbers only
+				('0' & Enemy2_X_pos + Enemy_Size >= '0' & pixel_x) AND
+				('0' & Enemy2_Y_pos <= '0' & pixel_y + Enemy_Size) AND
+				('0' & Enemy2_Y_pos + Enemy_Size >= '0' & pixel_y ) THEN
+					EnemyTank2_On <= '1';
+			ELSE
+					EnemyTank2_On <= '0';
+			END IF;			
+
 		when "010" =>
 			-- Set EnemyTank_On ='1' to display ball
 			IF ('0' & Enemy_X_pos <= '0' & pixel_x + Enemy_Size) AND
@@ -745,6 +749,16 @@ BEGIN
 					EnemyTank_On <= '1';
 			ELSE
 					EnemyTank_On <= '0';
+			END IF;
+			
+			IF ('0' & Enemy2_X_pos <= '0' & pixel_x + Enemy_Size) AND
+						-- compare positive numbers only
+				('0' & Enemy2_X_pos + Enemy_Size >= '0' & pixel_x) AND
+				('0' & Enemy2_Y_pos <= '0' & pixel_y + Enemy_Size) AND
+				('0' & Enemy2_Y_pos + Enemy_Size >= '0' & pixel_y ) THEN
+					EnemyTank2_On <= '1';
+			ELSE
+					EnemyTank2_On <= '0';
 			END IF;
 		when "011" =>
 			-- Set EnemyTank_On ='1' to display ball
@@ -757,8 +771,20 @@ BEGIN
 			ELSE
 					EnemyTank_On <= '0';
 			END IF;
+			
+			IF ('0' & Enemy2_X_pos <= '0' & pixel_x + Enemy_Size) AND
+						-- compare positive numbers only
+				('0' & Enemy2_X_pos + Enemy_Size >= '0' & pixel_x) AND
+				('0' & Enemy2_Y_pos <= '0' & pixel_y + Enemy_Size) AND
+				('0' & Enemy2_Y_pos + Enemy_Size >= '0' & pixel_y ) THEN
+					EnemyTank2_On <= '1';
+			ELSE
+					EnemyTank2_On <= '0';
+			END IF;
+		
 		when others =>
 			EnemyTank_On <= '0';
+			EnemyTank2_On <= '0';
 	end case;
 END process RGB_Display_Enemytank;
 
@@ -766,41 +792,164 @@ Move_Enemy: process
 BEGIN
 			-- Move enemy once every vertical sync
 	WAIT UNTIL vert_sync_int'event and vert_sync_int = '1';	
-		
-		case enemy_fsm is
-			when "00" =>
-				-- Bounce off left or right of screen
-				IF ('0' & Enemy_X_pos) >= '0' & CONV_STD_LOGIC_VECTOR(639,10) - Enemy_Size THEN
-					Enemy_X_motion <=  CONV_STD_LOGIC_VECTOR(-Enemy_X_motion_incrementer,10); -- negative 2
-					if (Enemy_Y_Pos >= CONV_STD_LOGIC_VECTOR(400, 10)) then
-							Enemy_Y_Pos <= CONV_STD_LOGIC_VECTOR(25, 10);
-						else
-							Enemy_Y_Pos <= Enemy_Y_Pos + 24;
-					end if;
-				ELSIF ('0' & Enemy_X_pos) <= Enemy_Size THEN
-					Enemy_X_motion <= CONV_STD_LOGIC_VECTOR(Enemy_X_motion_incrementer,10);
-					if (Enemy_Y_Pos >= CONV_STD_LOGIC_VECTOR(400, 10)) then
-						Enemy_Y_Pos <= CONV_STD_LOGIC_VECTOR(25, 10);
-					else
-						Enemy_Y_Pos <= Enemy_Y_Pos + 24;						
-					end if;
-				END IF;
-				-- Compute next enemy X positio
-					Enemy_X_pos <= Enemy_X_pos + Enemy_X_motion;
-									
-			when others =>
-				Enemy_X_Pos <= CONV_STD_LOGIC_VECTOR(counter, 10);				
-				Enemy_Y_pos <= CONV_STD_LOGIC_VECTOR(25,10);
-					if (rng_direction = '1') then
+	case game_status is
+		when "000" =>
+			Enemy2_X_Pos <= CONV_STD_LOGIC_VECTOR(counter1, 10);			
+			Enemy2_Y_pos <= CONV_STD_LOGIC_VECTOR(60,10);	
+			Enemy_X_Pos <= CONV_STD_LOGIC_VECTOR(counter, 10);				
+			Enemy_Y_pos <= CONV_STD_LOGIC_VECTOR(25,10);	
+			if (rng_direction = '1') then	
+				Enemy2_X_motion <= CONV_STD_LOGIC_VECTOR(Enemy_X_motion_incrementer,10);				
+				Enemy_X_motion <= CONV_STD_LOGIC_VECTOR(-Enemy_X_motion_incrementer,10);
+			else 
+				Enemy2_X_motion <= CONV_STD_LOGIC_VECTOR(-Enemy_X_motion_incrementer,10);
+				Enemy_X_motion <= CONV_STD_LOGIC_VECTOR(Enemy_X_motion_incrementer,10);	  
+			end if;			
+		when "001" =>
+			case enemy_fsm is
+				when "00" =>
+					-- Bounce off left or right of screen
+					IF ('0' & Enemy_X_pos) >= '0' & CONV_STD_LOGIC_VECTOR(639,10) - Enemy_Size THEN
+						Enemy_X_motion <=  CONV_STD_LOGIC_VECTOR(-Enemy_X_motion_incrementer,10); -- negative 2
+						Enemy_Y_Pos <= Enemy_Y_Pos + 43;
+					ELSIF ('0' & Enemy_X_pos) <= Enemy_Size THEN
 						Enemy_X_motion <= CONV_STD_LOGIC_VECTOR(Enemy_X_motion_incrementer,10);
-					else
-						Enemy_X_motion <= CONV_STD_LOGIC_VECTOR(-Enemy_X_motion_incrementer,10);
-					end if;	
-		end case;
-			
+						Enemy_Y_Pos <= Enemy_Y_Pos + 43;						
+					END IF;
+					
+					IF ('0' & Enemy2_X_pos) >= '0' & CONV_STD_LOGIC_VECTOR(639,10) - Enemy_Size THEN
+						Enemy2_X_motion <=  CONV_STD_LOGIC_VECTOR(-Enemy_X_motion_incrementer,10); -- negative 2
+						Enemy2_Y_Pos <= Enemy2_Y_Pos + 43;
+					ELSIF ('0' & Enemy2_X_pos) <= Enemy_Size THEN
+						Enemy2_X_motion <= CONV_STD_LOGIC_VECTOR(Enemy_X_motion_incrementer,10);
+						Enemy2_Y_Pos <= Enemy2_Y_Pos + 43;						
+					END IF;
+					-- Compute next enemy X positio
+					Enemy_X_pos <= Enemy_X_pos + Enemy_X_motion;
+					Enemy2_X_pos <= Enemy2_X_pos + Enemy2_X_motion;
+					
+				 when others =>
+					 IF (Tank1HIT = '1') THEN
+						 Enemy_X_Pos <= CONV_STD_LOGIC_VECTOR(counter, 10);				
+						 Enemy_Y_pos <= CONV_STD_LOGIC_VECTOR(25,10);
+						 if (rng_direction = '1') then
+							Enemy_X_motion <= CONV_STD_LOGIC_VECTOR(Enemy_X_motion_incrementer,10);
+						 else 
+							Enemy_X_motion <= CONV_STD_LOGIC_VECTOR(-Enemy_X_motion_incrementer,10);
+						 end if;
+					 END IF;
+					 IF (Tank2HIT = '1') THEN
+						 Enemy2_X_Pos <= CONV_STD_LOGIC_VECTOR(counter1, 10);			
+						 Enemy2_Y_pos <= CONV_STD_LOGIC_VECTOR(60,10);	
+						 if (rng_direction = '1') then	
+							Enemy2_X_motion <= CONV_STD_LOGIC_VECTOR(Enemy_X_motion_incrementer,10);	
+						 else 
+							Enemy2_X_motion <= CONV_STD_LOGIC_VECTOR(-Enemy_X_motion_incrementer,10);  
+						 end if;
+					 END IF;
+				 end case;
+		when "010" =>
+			case enemy_fsm is
+				when "00" =>
+					-- Bounce off left or right of screen
+					IF ('0' & Enemy_X_pos) >= '0' & CONV_STD_LOGIC_VECTOR(639,10) - Enemy_Size THEN
+						Enemy_X_motion <=  CONV_STD_LOGIC_VECTOR(-Enemy_X_motion_incrementer,10); -- negative 2
+						Enemy_Y_Pos <= Enemy_Y_Pos + 43;
+					ELSIF ('0' & Enemy_X_pos) <= Enemy_Size THEN
+						Enemy_X_motion <= CONV_STD_LOGIC_VECTOR(Enemy_X_motion_incrementer,10);
+						Enemy_Y_Pos <= Enemy_Y_Pos + 43;						
+					END IF;
+					
+					IF ('0' & Enemy2_X_pos) >= '0' & CONV_STD_LOGIC_VECTOR(639,10) - Enemy_Size THEN
+						Enemy2_X_motion <=  CONV_STD_LOGIC_VECTOR(-Enemy_X_motion_incrementer,10); -- negative 2
+						Enemy2_Y_Pos <= Enemy2_Y_Pos + 43;
+					ELSIF ('0' & Enemy2_X_pos) <= Enemy_Size THEN
+						Enemy2_X_motion <= CONV_STD_LOGIC_VECTOR(Enemy_X_motion_incrementer,10);
+						Enemy2_Y_Pos <= Enemy2_Y_Pos + 43;						
+					END IF;
+					-- Compute next enemy X positio
+					Enemy_X_pos <= Enemy_X_pos + Enemy_X_motion;
+					Enemy2_X_pos <= Enemy2_X_pos + Enemy2_X_motion;
+					
+				 when others =>
+					 IF (Tank1HIT = '1') THEN
+						 Enemy_X_Pos <= CONV_STD_LOGIC_VECTOR(counter, 10);				
+						 Enemy_Y_pos <= CONV_STD_LOGIC_VECTOR(25,10);
+						 if (rng_direction = '1') then
+							Enemy_X_motion <= CONV_STD_LOGIC_VECTOR(Enemy_X_motion_incrementer,10);
+						 else 
+							Enemy_X_motion <= CONV_STD_LOGIC_VECTOR(-Enemy_X_motion_incrementer,10);
+						 end if;
+					 END IF;
+					 IF (Tank2HIT = '1') THEN
+						 Enemy2_X_Pos <= CONV_STD_LOGIC_VECTOR(counter1, 10);			
+						 Enemy2_Y_pos <= CONV_STD_LOGIC_VECTOR(60,10);	
+						 if (rng_direction = '1') then	
+							Enemy2_X_motion <= CONV_STD_LOGIC_VECTOR(Enemy_X_motion_incrementer,10);	
+						 else 
+							Enemy2_X_motion <= CONV_STD_LOGIC_VECTOR(-Enemy_X_motion_incrementer,10);  
+						 end if;
+					 END IF;
+				 end case;
+		when "011" =>
+			case enemy_fsm is
+				when "00" =>
+					-- Bounce off left or right of screen
+					IF ('0' & Enemy_X_pos) >= '0' & CONV_STD_LOGIC_VECTOR(639,10) - Enemy_Size THEN
+						Enemy_X_motion <=  CONV_STD_LOGIC_VECTOR(-Enemy_X_motion_incrementer,10); -- negative 2
+						Enemy_Y_Pos <= Enemy_Y_Pos + 43;
+					ELSIF ('0' & Enemy_X_pos) <= Enemy_Size THEN
+						Enemy_X_motion <= CONV_STD_LOGIC_VECTOR(Enemy_X_motion_incrementer,10);
+						Enemy_Y_Pos <= Enemy_Y_Pos + 43;						
+					END IF;
+					
+					IF ('0' & Enemy2_X_pos) >= '0' & CONV_STD_LOGIC_VECTOR(639,10) - Enemy_Size THEN
+						Enemy2_X_motion <=  CONV_STD_LOGIC_VECTOR(-Enemy_X_motion_incrementer,10); -- negative 2
+						Enemy2_Y_Pos <= Enemy2_Y_Pos + 43;
+					ELSIF ('0' & Enemy2_X_pos) <= Enemy_Size THEN
+						Enemy2_X_motion <= CONV_STD_LOGIC_VECTOR(Enemy_X_motion_incrementer,10);
+						Enemy2_Y_Pos <= Enemy2_Y_Pos + 43;						
+					END IF;
+					-- Compute next enemy X positio
+					Enemy_X_pos <= Enemy_X_pos + Enemy_X_motion;
+					Enemy2_X_pos <= Enemy2_X_pos + Enemy2_X_motion;
+					
+				 when others =>
+					 IF (Tank1HIT = '1') THEN
+						 Enemy_X_Pos <= CONV_STD_LOGIC_VECTOR(counter, 10);				
+						 Enemy_Y_pos <= CONV_STD_LOGIC_VECTOR(25,10);
+						 if (rng_direction = '1') then
+							Enemy_X_motion <= CONV_STD_LOGIC_VECTOR(Enemy_X_motion_incrementer,10);
+						 else 
+							Enemy_X_motion <= CONV_STD_LOGIC_VECTOR(-Enemy_X_motion_incrementer,10);
+						 end if;
+					 END IF;
+					 IF (Tank2HIT = '1') THEN
+						 Enemy2_X_Pos <= CONV_STD_LOGIC_VECTOR(counter1, 10);			
+						 Enemy2_Y_pos <= CONV_STD_LOGIC_VECTOR(60,10);	
+						 if (rng_direction = '1') then	
+							Enemy2_X_motion <= CONV_STD_LOGIC_VECTOR(Enemy_X_motion_incrementer,10);	
+						 else 
+							Enemy2_X_motion <= CONV_STD_LOGIC_VECTOR(-Enemy_X_motion_incrementer,10);  
+						 end if;
+					 END IF;
+				end case;
+		when others =>
+			Enemy2_X_Pos <= CONV_STD_LOGIC_VECTOR(counter1, 10);			
+			Enemy2_Y_pos <= CONV_STD_LOGIC_VECTOR(60,10);	
+			Enemy_X_Pos <= CONV_STD_LOGIC_VECTOR(counter, 10);				
+			Enemy_Y_pos <= CONV_STD_LOGIC_VECTOR(25,10);	
+			if (rng_direction = '1') then	
+				Enemy2_X_motion <= CONV_STD_LOGIC_VECTOR(Enemy_X_motion_incrementer,10);				
+				Enemy_X_motion <= CONV_STD_LOGIC_VECTOR(-Enemy_X_motion_incrementer,10);
+			else 
+				Enemy2_X_motion <= CONV_STD_LOGIC_VECTOR(-Enemy_X_motion_incrementer,10);
+				Enemy_X_motion <= CONV_STD_LOGIC_VECTOR(Enemy_X_motion_incrementer,10);	  
+			end if;	
+	end case;		
 END process Move_Enemy;
 
-Player_Lose <= '1' when (Enemy_Y_Pos >= CONV_STD_LOGIC_VECTOR(400, 10)) else '0';
+Player_Lose <= '1' when (Enemy_Y_Pos >= CONV_STD_LOGIC_VECTOR(400, 10) or Enemy2_Y_Pos >= CONV_STD_LOGIC_VECTOR(400, 10)) else '0';
 
 --------------------------------- PLAYER TANK AND PROCESSES --------------------------------------
 
@@ -818,7 +967,8 @@ BEGIN
 						-- compare positive numbers only
 				('0' & Player_X_Pos + Player_Size >= '0' & pixel_x) AND
 				('0' & Player_Y_Pos <= '0' & pixel_y + Player_Size) AND
-				('0' & Player_Y_Pos + Player_Size >= '0' & pixel_y ) THEN
+				('0' & Player_Y_Pos + Player_Size >= '0' & pixel_y ) 
+THEN
 					PlayerTank_on <= '1';
 			  ELSE
 					PlayerTank_on <= '0';
@@ -901,8 +1051,21 @@ if(vert_sync_int'event and vert_sync_int = '1') then
 					IF ('0' & Enemy_X_Pos <= '0' & bullet_X_pos + Enemy_Size) AND
 						('0' & Enemy_X_Pos + Enemy_Size >= '0' & bullet_X_pos) AND
 						('0' & Enemy_Y_Pos <= '0' & bullet_Y_pos + Enemy_Size) AND
-						('0' & Enemy_Y_Pos + Enemy_Size >= '0' & bullet_Y_Pos) THEN
-						-------------------gamescore counter------------------------------------
+						('0' & Enemy_Y_Pos + Enemy_Size >= '0' & bullet_Y_Pos) THEN 
+							Tank1HIT <= '1';
+					ELSE
+						IF ('0' & Enemy2_X_Pos <= '0' & bullet_X_pos + Enemy_Size) AND
+							('0' & Enemy2_X_Pos + Enemy_Size >= '0' & bullet_X_pos) AND
+							('0' & Enemy2_Y_Pos <= '0' & bullet_Y_pos + Enemy_Size) AND
+							('0' & Enemy2_Y_Pos + Enemy_Size >= '0' & bullet_Y_Pos) THEN  
+							Tank2HIT <= '1';
+						ELSE
+							Tank2HIT <= '0';
+						END IF;
+						Tank1HIT <= '0';
+					END IF;
+					-------------------gamescore counter------------------------------------
+					if (Tank1HIT = '1' or Tank2HIT = '1') then
 						if gameScore1 = "1001" then
 							Enemy_X_motion_incrementer <= Enemy_X_motion_incrementer + 1;
 							if gameScore10 = "1001" then
@@ -939,13 +1102,26 @@ if(vert_sync_int'event and vert_sync_int = '1') then
 						bullet_Y_Pos <= CONV_STD_LOGIC_VECTOR(410, 10); --hard coded to be just above player tank
 						bullet_X_Pos <= player_X_Pos;
 				end if;
-				--check if bullet hits enemy
+					--check if bullet hits enemy
 				if (bullet_fired = '1') then
 					IF ('0' & Enemy_X_Pos <= '0' & bullet_X_pos + Enemy_Size) AND
 						('0' & Enemy_X_Pos + Enemy_Size >= '0' & bullet_X_pos) AND
 						('0' & Enemy_Y_Pos <= '0' & bullet_Y_pos + Enemy_Size) AND
-						('0' & Enemy_Y_Pos + Enemy_Size >= '0' & bullet_Y_Pos) THEN
-						-------------------gamescore counter------------------------------------
+						('0' & Enemy_Y_Pos + Enemy_Size >= '0' & bullet_Y_Pos) THEN 
+							Tank1HIT <= '1';
+					ELSE
+						IF ('0' & Enemy2_X_Pos <= '0' & bullet_X_pos + Enemy_Size) AND
+							('0' & Enemy2_X_Pos + Enemy_Size >= '0' & bullet_X_pos) AND
+							('0' & Enemy2_Y_Pos <= '0' & bullet_Y_pos + Enemy_Size) AND
+							('0' & Enemy2_Y_Pos + Enemy_Size >= '0' & bullet_Y_Pos) THEN  
+							Tank2HIT <= '1';
+						ELSE
+							Tank2HIT <= '0';
+						END IF;
+						Tank1HIT <= '0';
+					END IF;
+					-------------------gamescore counter------------------------------------
+					if (Tank1HIT = '1' or Tank2HIT = '1') then
 						if gameScore1 = "1001" then
 							if gameScore10 = "1001" then
 								if gameScore100 = "1001" then
@@ -989,12 +1165,26 @@ if(vert_sync_int'event and vert_sync_int = '1') then
 						bullet_X_Pos <= player_X_Pos;
 				end if;
 				--check if bullet hits enemy
+					--check if bullet hits enemy
 				if (bullet_fired = '1') then
 					IF ('0' & Enemy_X_Pos <= '0' & bullet_X_pos + Enemy_Size) AND
 						('0' & Enemy_X_Pos + Enemy_Size >= '0' & bullet_X_pos) AND
 						('0' & Enemy_Y_Pos <= '0' & bullet_Y_pos + Enemy_Size) AND
-						('0' & Enemy_Y_Pos + Enemy_Size >= '0' & bullet_Y_Pos) THEN
-						-------------------gamescore counter------------------------------------
+						('0' & Enemy_Y_Pos + Enemy_Size >= '0' & bullet_Y_Pos) THEN 
+							Tank1HIT <= '1';
+					ELSE
+						IF ('0' & Enemy2_X_Pos <= '0' & bullet_X_pos + Enemy_Size) AND
+							('0' & Enemy2_X_Pos + Enemy_Size >= '0' & bullet_X_pos) AND
+							('0' & Enemy2_Y_Pos <= '0' & bullet_Y_pos + Enemy_Size) AND
+							('0' & Enemy2_Y_Pos + Enemy_Size >= '0' & bullet_Y_Pos) THEN  
+							Tank2HIT <= '1';
+						ELSE
+							Tank2HIT <= '0';
+						END IF;
+						Tank1HIT <= '0';
+					END IF;
+					-------------------gamescore counter------------------------------------
+					if (Tank1HIT = '1' or Tank2HIT = '1') then
 						if gameScore1 = "1001" then
 							if gameScore10 = "1001" then
 								if gameScore100 = "1001" then
@@ -1091,8 +1281,10 @@ RNG_Enemy_Position: process (clock)
 			if (clock'event and clock = '1') then
 				if (counter > 620) then
 					counter <= 20;
+					counter1 <= 10;
 				else
 					counter <= counter + 1;
+					counter1 <= counter1 + 1;
 				end if;
 				if (CONV_INTEGER(timer0) mod 2 = 0) then
 					rng_direction <= '1';
